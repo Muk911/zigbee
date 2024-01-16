@@ -8,6 +8,7 @@
 ### ПО для программирования ###
 Для разработки прошивок под модули ESP32-C6/H2 компания Expressif предоставляет open-source продукт [Expressif IoT Development Framework (IDF)](https://github.com/espressif/esp-idf).
 Входящий в него Expressif IDE представляет собой надстройку над Eclipse. Доступно также расширение Expressif IDF для VS Code+PlatformIO.
+
 Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. Ниже описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2.
 Еще одной альтернативой является использование Expressif IDF и подключение библиотек Arduino как компонентов IDF.
 ### Установка Arduino IDE и расширения ESP32-C6/H2 ###
