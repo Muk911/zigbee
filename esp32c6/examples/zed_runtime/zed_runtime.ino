@@ -86,8 +86,6 @@ void setup()
   zd.setMaxChildren(16);
   zd.setNetworkChannel(ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK);
   
-  //coo.addAttr8(ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID)
-  //.setVar(&relay_status)
   aoo.setValueChangedCB(OnOff_StateChanged);
     
   relay_init();
