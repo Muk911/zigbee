@@ -39,3 +39,4 @@
 - https://github.com/kylemwagner83/esp32c6-bme280-zigbee
 - https://github.com/nomis/candle-dribbler
 - https://github.com/Live-Control-Project/MEEF/tree/dee5d92de55080a689c7ff1fa3784ed4a95962a1
+- https://github.com/Live-Control-Project/MEEF
