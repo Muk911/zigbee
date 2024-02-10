@@ -39,3 +39,5 @@
 - https://github.com/kylemwagner83/esp32c6-bme280-zigbee
 - https://github.com/nomis/candle-dribbler
 - https://github.com/Live-Control-Project/MEEF
+- https://github.com/xmow49/ESP32H2-Zigbee-Demo
+- https://github.com/xmow49/ESP32H2-SmokeDetector
