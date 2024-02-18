@@ -102,7 +102,7 @@ for (const file of settings.get().external_converters) {
             return;
         }
 ```
-Последующий код содержит некоторую магию Z2M, после чего выполняется поиск конвертера по совпадению имени атрибута и конечной точки Zigbee:
+Последующий код содержит некоторую магию Z2M, после чего выполняется поиск конвертера по совпадению имени атрибута и конечной точки Zigbee и применения найденного конвертера.
 ```
             const converter = converters.find((c) =>
                 c.key.includes(key) && (!c.endpoint || c.endpoint == endpointName));
