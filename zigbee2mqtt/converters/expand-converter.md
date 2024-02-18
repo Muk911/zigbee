@@ -69,12 +69,10 @@ definition.convertBase = definition.fromZigbee[0].convert;
 Затем заменяем существующую реализацию функции преобразования новой, в которой происходит преобразование только для локальной температуры, а для остальных dataPoints вызывается базовая функция.
 ```
   definition.fromZigbee[0].convert = (model, msg, publish, options, meta) => {
-      const dpValue = msg.data.dpValues[0];
-      const dp = dpValue.dp;
-      const value = legacy.getDataValue(dpValue);
-      let temperature;
-      if(dp == legacy.dataPoints.moesLocalTemp) {
-          temperature = value & 1<<15 ? value - (1<<16) + 1 : value;
+      const dpValue = msg.data.dpValues[0]; 
+      if(dpValue.dp == legacy.dataPoints.moesLocalTemp) {
+          const value = legacy.getDataValue(dpValue);
+          let temperature = value & 1<<15 ? value - (1<<16) + 1 : value;
           temperature = parseFloat(temperature.toFixed(1));
           if (temperature < 100) {
               return {local_temperature: parseFloat(temperature.toFixed(1))};
@@ -84,3 +82,4 @@ definition.convertBase = definition.fromZigbee[0].convert;
           meta.device.definition.convertBase(model, msg, publish, options, meta);
        }       
    }
+```
