@@ -91,4 +91,21 @@ for (const file of settings.get().external_converters) {
             }
         }
 ```
-Похожий код содержится и в расширении publish.ts, отвечающем за отправкой данных из MQTT в сторону устройства через Zigbee-координатор.
+Похожий код содержится и в расширении publish.ts, отвечающем за отправкой данных из MQTT в сторону устройства через Zigbee-координатор. 
+
+Вначале ищется устройство (или группа устройств) по его entity_id из имени топика MQTT.
+```
+       const re = this.zigbee.resolveEntity(parsedTopic.ID);
+        if (re == null) {
+            this.legacyLog({type: `entity_not_found`, message: {friendly_name: parsedTopic.ID}});
+            logger.error(`Entity '${parsedTopic.ID}' is unknown`);
+            return;
+        }
+```
+Последующий код содержит некоторую магию Z2M, после чего выполняется поиск конвертера по совпадению имени атрибута и конечной точки Zigbee:
+```
+            const converter = converters.find((c) =>
+                c.key.includes(key) && (!c.endpoint || c.endpoint == endpointName));
+...
+            const result = await converter.convertSet(localTarget, key, value, meta);
+```
