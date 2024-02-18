@@ -1,5 +1,8 @@
+const deviceIeeeAddr = '0xa4c138c25cfc85a4';
+
 class DeviceDebugExtension {
     constructor(zigbee, mqtt, state, publishEntityState, eventBus, settings, logger) {
+        //logger.info('Loaded DeviceDebugExtension');
         this.mqttBaseTopic = settings.get().mqtt.base_topic;
         this.eventBus = eventBus;
         this.mqtt = mqtt;
@@ -7,7 +10,7 @@ class DeviceDebugExtension {
     }
 
     onDeviceMessage(data) {
-        if(data.device.ieeeAddr == '0xa4c138c25cfc85a4') {
+        if(data.device.ieeeAddr == deviceIeeeAddr) {
             const dpValues = data.data.dpValues;
             if(dpValues) {
                 this.logger.info(`*** cluster='${data.cluster}', type='${data.type}', dpValues='${JSON.stringify(dpValues)}'`);
