@@ -25,10 +25,21 @@ const definition = {...baseDefinition};
 ```
 Благодаря оператору расширения (...) копируется не ссылка, а вся структура определения, что позволяет производить модификацию любых элементов нового определения, не затрагивая исходное определение.
 
-Далее заменяем значения атрибутов определения на нужные нам.
+Далее заменяем значения атрибутов определения на нужные нам:
 ```
 definition.fingerprint = [{modelID: 'TS0601', manufacturerName: '_TZE200_o9d1hdma'}];
 definition.model = 'AE-668D-Zigbee';
 definition.vendor = 'Acmelec';
 definition.description = 'Acmelec AE-668D Zigbee Thermostat';
 ```
+Это же можно написать более лаконично:
+```
+const definition = {
+  ...baseDefinition,
+  fingerprint: [{modelID: 'TS0601', manufacturerName: '_TZE200_o9d1hdma'}],
+  model: 'AE-668D-Zigbee',
+  vendor: 'Acmelec',
+  description: 'Acmelec AE-668D Zigbee Thermostat',
+};
+```
+Здесь сразу выполняется копирование определения и заменяются значения атрибутов. 
