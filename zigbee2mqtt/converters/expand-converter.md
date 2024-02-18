@@ -82,7 +82,7 @@ definition.convertBase = definition.fromZigbee[0].convert;
               }
           }
           else {
-              meta.device.definition.convertBase(model, msg, publish, options, meta);
+              return meta.device.definition.convertBase(model, msg, publish, options, meta);
           }
       }     
   }
