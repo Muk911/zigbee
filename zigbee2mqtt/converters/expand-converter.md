@@ -61,26 +61,29 @@ fromZigbee: [legacy.fz.moes_thermostat],
 Сама функция-конвертер moes_thermostat находится в файле [legacy.ts](https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/lib/legacy.ts).
 
 Если быть точнее, moes_thermostat - это структура, содержащая кластер, тип команды ZCL, и указатель convert на функцию преобразования.
-Внутри функции находится оператор switch(dp){}, выполняющий ветвление на код преобразования для нужного dataPoint. Особенности реализации устройств Tuya будут рассмотрены в другой статье, здесь хочется показать общий подход к изменению логики преобразования.
+Внутри функции находится оператор switch(dp){}, выполняющий ветвление в зависимости от значения dataPoint. Особенности реализации устройств Tuya будут рассмотрены в другой статье, здесь хочется показать общий подход к изменению логики преобразования.
 
-Предварительно сохраняем указатель на существующую реализацию функции преобразования в новом атрибуте определения устройства.
+Предварительно сохраняем указатель на существующую реализацию функции преобразования в вспомогательном атрибуте определения устройства.
 ```
 definition.convertBase = definition.fromZigbee[0].convert;
 ```
 Затем заменяем существующую реализацию функции преобразования новой, в которой происходит преобразование только для локальной температуры, а для остальных dataPoints вызывается базовая функция.
 ```
-  definition.fromZigbee[0].convert = (model, msg, publish, options, meta) => {
-      const dpValue = msg.data.dpValues[0]; 
-      if(dpValue.dp == legacy.dataPoints.moesLocalTemp) {
-          const value = legacy.getDataValue(dpValue);
-          let temperature = value & 1<<15 ? value - (1<<16) + 1 : value;
-          temperature = parseFloat(temperature.toFixed(1));
-          if (temperature < 100) {
-              return {local_temperature: parseFloat(temperature.toFixed(1))};
+  definition.fromZigbee[0] = {
+      ...definition.fromZigbee[0],
+      convert: (model, msg, publish, options, meta) => {
+          const dpValue = msg.data.dpValues[0]; 
+          if(dpValue.dp == legacy.dataPoints.moesLocalTemp) {
+              const value = legacy.getDataValue(dpValue);
+              let temperature = value & 1<<15 ? value - (1<<16) + 1 : value;
+              temperature = parseFloat(temperature.toFixed(1));
+              if (temperature < 100) {
+                  return {local_temperature: parseFloat(temperature.toFixed(1))};
+              }
           }
-       }
-       else {
-          meta.device.definition.convertBase(model, msg, publish, options, meta);
-       }       
-   }
+          else {
+              meta.device.definition.convertBase(model, msg, publish, options, meta);
+          }
+      }     
+  }
 ```
