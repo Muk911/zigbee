@@ -26,6 +26,11 @@
 ## Загрузка внешних конвертеров ##
 Загрузка внешних конвертеров в память выполняется в коде расширения [externalConverters.ts](https://github.com/Koenkk/zigbee2mqtt/blob/master/lib/extension/externalConverters.ts).
 ```
+import * as zhc from 'zigbee-herdsman-converters';
+import * as settings from '../util/settings';
+import {loadExternalConverter} from '../util/utils';
+
+...
 for (const file of settings.get().external_converters) {
             try {
                 for (const definition of loadExternalConverter(file)) {
