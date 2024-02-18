@@ -8,4 +8,5 @@
 В данной статье делается попытка разъяснить некоторые ключевые моменты, понимание которых делает процесс написания конвертеров чуть легче.
 
 # Конвертеры Z2M #
-Конвертеры устройств Z2M выделены в отдельную библиотеку [zigbee-herdsman-converters](https://github.com/Koenkk/zigbee-herdsman-converters). 
+Конвертеры устройств Z2M выделены в отдельную библиотеку [zigbee-herdsman-converters](https://github.com/Koenkk/zigbee-herdsman-converters). Рекоменуется изучить структуру этой библиотеки. Также рекомендуется ознакомиться с механизмом [расширений Z2M](https://github.com/Koenkk/zigbee2mqtt/tree/master/lib/extension).
+
