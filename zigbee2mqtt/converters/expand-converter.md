@@ -63,9 +63,9 @@ fromZigbee: [legacy.fz.moes_thermostat],
 Если быть точнее, moes_thermostat - это структура, содержащая кластер, тип команды ZCL, и указатель convert на функцию преобразования.
 Внутри функции находится оператор switch(dp){}, выполняющий ветвление в зависимости от значения dataPoint. Особенности реализации устройств Tuya будут рассмотрены в другой статье, здесь хочется показать общий подход к изменению логики преобразования.
 
-Предварительно сохраняем указатель на существующую реализацию функции преобразования в вспомогательном атрибуте определения устройства.
+Предварительно сохраняем указатель на существующую реализацию функции преобразования в модуле конвертера.
 ```
-definition.convertBase = definition.fromZigbee[0].convert;
+const convertBase = definition.fromZigbee[0].convert;
 ```
 Затем заменяем существующую реализацию функции преобразования новой, в которой происходит преобразование только для локальной температуры, а для остальных dataPoints вызывается базовая функция.
 ```
@@ -82,8 +82,12 @@ definition.convertBase = definition.fromZigbee[0].convert;
               }
           }
           else {
-              return meta.device.definition.convertBase(model, msg, publish, options, meta);
+              return convertBase(model, msg, publish, options, meta);
           }
       }     
   }
+```
+Можно не сохранять указатель на прежнюю реализацию функции конвертера, а вызвать ее непосредственно:
+```
+               return legacy.fz.moes_thermostat.convert(model, msg, publish, options, meta);
 ```
