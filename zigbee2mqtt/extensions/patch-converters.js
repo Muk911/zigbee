@@ -18,7 +18,7 @@ class ConverterPathExtension {
                 toAdd.vendor = 'Acmelec';
                 toAdd.description = 'Acmelec AE-668D Zigbee Thermostat !!!';
                 toAdd.fromZigbee.oldConvert = toAdd.fromZigbee.convert;
-                toAdd.fromZigbee.convert = (model, msg, publish, options, meta) => {
+                toAdd.fromZigbee[0].convert = (model, msg, publish, options, meta) => {
                     const dpValue = msg.data.dpValues[0];
                     const dp = dpValue.dp;
                     const value = legacy.getDataValue(dpValue);
