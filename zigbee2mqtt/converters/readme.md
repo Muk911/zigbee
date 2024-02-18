@@ -19,8 +19,29 @@
 - "отпечаток пальцев" модели (fingerprint), использующийся для подбора конвертера для подключенного устройства
 - массив "навыков" (exposes), управляющий представлением атрибутов устройства в UI Z2M и отображением в модели данных ПО Умного Дома (например, Home Assistant)
 - массив функций конвертеров, выполняющих преобразование данных между форматом Zigbee Cluster Library и форматом топиков MQTT
-- функции конфигурирования устройства и настройки ропортинга 
+- функции конфигурирования устройства и настройки репортинга 
 
 Некоторые из перечисленных элементов используются только на этапе джойна устройств, другие задействованы при каждом обмене данными с устройством.
 
 ## Загрузка внешних конвертеров ##
+Загрузка внешних конвертеров в память выполняется в коде расширения [externalConverters.ts](https://github.com/Koenkk/zigbee2mqtt/blob/master/lib/extension/externalConverters.ts).
+```
+for (const file of settings.get().external_converters) {
+            try {
+                for (const definition of loadExternalConverter(file)) {
+                    const toAdd = {...definition};
+                    delete toAdd['homeassistant'];
+                    zhc.addDefinition(toAdd);
+                }
+            } catch (error) {
+                logger.error(`Failed to load external converter file '${file}' (${error.message})`);
+                logger.error(
+                    `Probably there is a syntax error in the file or the external converter is not ` +
+                    `compatible with the current Zigbee2MQTT version`);
+                logger.error(
+                    `Note that external converters are not meant for long term usage, it's meant for local ` +
+                    `testing after which a pull request should be created to add out-of-the-box support for the device`,
+                );
+            }
+        }
+```
