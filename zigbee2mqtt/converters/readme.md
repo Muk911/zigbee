@@ -109,5 +109,5 @@ for (const file of settings.get().external_converters) {
 ...
             const result = await converter.convertSet(localTarget, key, value, meta);
 ```
-## Написание конвертера ##
+## Написание внешнего конвертера ##
 [Расширение существующего конвертера](https://github.com/Muk911/zigbee/blob/main/zigbee2mqtt/converters/expand-converter.md)
