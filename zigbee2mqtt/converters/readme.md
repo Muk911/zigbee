@@ -113,4 +113,6 @@ for (const file of settings.get().external_converters) {
 
 [Расширение существующего конвертера](https://github.com/Muk911/zigbee/blob/main/zigbee2mqtt/converters/expand-converter.md)
 
+[Перехват сообщений от устройства](https://github.com/Koenkk/zigbee2mqtt/tree/master/lib/extension)
+
 [Тестирование конвертеров](convert-test.md)
