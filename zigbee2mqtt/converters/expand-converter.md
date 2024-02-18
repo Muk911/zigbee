@@ -59,6 +59,7 @@ module.exports = definition;
 fromZigbee: [legacy.fz.moes_thermostat],
 ```
 Сама функция-конвертер moes_thermostat находится в файле [legacy.ts](https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/lib/legacy.ts).
+
 Если быть точнее, moes_thermostat - это структура, содержащая кластер, тип команды ZCL, и указатель convert на функцию преобразования.
 Внутри функции находится оператор switch(dp){}, выполняющий ветвление на код преобразования для нужного dataPoint. Особенности реализации устройств Tuya будут рассмотрены в другой статье, здесь хочется показать общий подход к изменению логики преобразования.
 
