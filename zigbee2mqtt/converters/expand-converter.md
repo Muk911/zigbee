@@ -93,3 +93,4 @@ const convertBase = definition.fromZigbee[0].convert;
 ```
                return legacy.fz.moes_thermostat.convert(model, msg, publish, options, meta);
 ```
+Целиком файл конвертера лежит [здесь](expanded-converter.js).
