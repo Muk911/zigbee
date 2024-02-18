@@ -50,6 +50,37 @@ module.exports = definition;
 ```
 ## Изменение логики преобразования ##
 Если в новой модели устройства произошли более существенные изменения, то в новом определении устройства необходимо реализовать добавление (или удаление) элементов или замену существующих элементов на их новую версию.
-Рассмотрим кейс, когда новое устройство передает значение атрибута с другим множителем.
+Рассмотрим кейс, когда новая версия термостата экосистемы Tuya передает значение атрибута local_temperature с другим множителем.
 
+За базовое определение устройства выбрана популярная модель термостата Moes BHT-002-GCLZB.
+Преобразование данных, передаваемых из устройства в MQTT, выполняется функциями-конвертерами, массив которых содержится в атрибуте fromZigbee определения устройства.
+Файл [конвертеров Moes](https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/devices/moes.ts) для модели BHT-002-GCLZB содержит всего одну такую функцию:
+```
+fromZigbee: [legacy.fz.moes_thermostat],
+```
+Сама функция-конвертер moes_thermostat находится в файле [legacy.ts](https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/lib/legacy.ts).
+Если быть точнее, moes_thermostat - это структура, содержащая кластер, тип команды ZCL, и указатель convert на функцию преобразования.
+Внутри функции находится оператор switch(dp){}, выполняющий ветвление на код преобразования для нужного dataPoint. Особенности реализации устройств Tuya будут рассмотрены в другой статье, здесь хочется показать общий подход к изменению логики преобразования.
 
+Предварительно сохраняем указатель на существующую реализацию функции преобразования в новом атрибуте определения устройства.
+```
+definition.convertBase = definition.fromZigbee[0].convert;
+```
+Затем заменяем существующую реализацию функции преобразования новой, в которой происходит преобразование только для локальной температуры, а для остальных dataPoints вызывается базовая функция.
+```
+  definition.fromZigbee[0].convert = (model, msg, publish, options, meta) => {
+      const dpValue = msg.data.dpValues[0];
+      const dp = dpValue.dp;
+      const value = legacy.getDataValue(dpValue);
+      let temperature;
+      if(dp == legacy.dataPoints.moesLocalTemp) {
+          temperature = value & 1<<15 ? value - (1<<16) + 1 : value;
+          temperature = parseFloat(temperature.toFixed(1));
+          if (temperature < 100) {
+              return {local_temperature: parseFloat(temperature.toFixed(1))};
+          }
+       }
+       else {
+          meta.device.definition.convertBase(model, msg, publish, options, meta);
+       }       
+   }
