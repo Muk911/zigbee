@@ -50,6 +50,45 @@ for (const file of settings.get().external_converters) {
             }
         }
 ```
-Как видно из кода, список имен файлов извлекается из настроек Z2M, содержимое этих файлов загружается в память, после чего все определения, найденные в файле внешнего конвертера добавляются в коллекцию definitions объекта ZigbeeHerdsmanConverters. В процессе добавления определения из него извлекаются название модели и "отпечатки пальцев" (fingerprint), которые записываются в таблицу соответствия (lookup), используемую для подбора определения для подключенного устройства.
+Как видно из кода, список имен файлов внешних конвертеров извлекается из настроек Z2M, содержимое этих файлов загружается в память, после чего все определения, найденные в файле внешнего конвертера добавляются в коллекцию definitions объекта ZigbeeHerdsmanConverters. В процессе добавления определения из него извлекаются название модели и "отпечатки пальцев" (fingerprint), которые записываются в таблицу соответствия (lookup), используемую для подбора определения для подключенного устройства.
 
+## Использование конвертеров при обмене данными ##
+Логика использования внешних конвертеров для преобразования Zigbee-данных начинается в расширениях [publish.ts](https://github.com/Koenkk/zigbee2mqtt/blob/master/lib/extension/publish.ts) и [receive.ts](https://github.com/Koenkk/zigbee2mqtt/blob/master/lib/extension/receive.ts).
+Например в расширении receive.ts присутствует код:
+```
+...
+        const converters = data.device.definition.fromZigbee.filter((c) => {
+            const type = Array.isArray(c.type) ? c.type.includes(data.type) : c.type === data.type;
+            return c.cluster === data.cluster && type;
+        });
+        // Check if there is an available converter, genOta messages are not interesting.
+        const ignoreClusters: (string | number)[] = ['genOta', 'genTime', 'genBasic', 'genPollCtrl'];
+        if (converters.length == 0 && !ignoreClusters.includes(data.cluster)) {
+            logger.debug(`No converter available for '${data.device.definition.model}' with ` +
+                `cluster '${data.cluster}' and type '${data.type}' and data '${stringify(data.data)}'`);
+            utils.publishLastSeen({device: data.device, reason: 'messageEmitted'},
+                settings.get(), true, this.publishEntityState);
+            return;
+        }
+```
+Здесь в определении устройства (data.device.definition) выполняется поиск функции-конвертера по типу и кластеру. В случае ненахождения функции-конвертера выдается ошибка.
 
+Далее все подходящие функции конвертеры применяются для формирования json в формате, используемом для публикации данных в MQTT:
+```
+        let payload: KeyValue = {};
+        for (const converter of converters) {
+            try {
+                const convertData = {...data, device: data.device.zh};
+                const options: KeyValue = data.device.options;
+                const converted = await converter.convert(
+                    data.device.definition, convertData, publish, options, meta);
+                if (converted) {
+                    payload = {...payload, ...converted};
+                }
+            } catch (error) /* istanbul ignore next */ {
+                logger.error(`Exception while calling fromZigbee converter: ${error.message}}`);
+                logger.debug(error.stack);
+            }
+        }
+```
+Похожий код содержится и в расширении publish.ts, отвечающем за отправкой данных из MQTT в сторону устройства через Zigbee-координатор.
