@@ -111,3 +111,4 @@ for (const file of settings.get().external_converters) {
 ```
 ## Написание внешнего конвертера ##
 [Расширение существующего конвертера](https://github.com/Muk911/zigbee/blob/main/zigbee2mqtt/converters/expand-converter.md)
+[Тестирование конвертеров](convert-test.md)
