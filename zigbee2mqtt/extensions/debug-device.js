@@ -2,7 +2,6 @@ const deviceIeeeAddr = '0xa4c138c25cfc85a4';
 
 class DeviceDebugExtension {
     constructor(zigbee, mqtt, state, publishEntityState, eventBus, settings, logger) {
-        //logger.info('Loaded DeviceDebugExtension');
         this.eventBus = eventBus;
         this.mqtt = mqtt;
         this.logger = logger;
