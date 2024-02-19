@@ -7,3 +7,5 @@ https://developer.tuya.com/en/docs/iot/tuya-zigbee-module-uart-communication-pro
 https://github.com/DzurisHome/Tuya-Data-Points
 
 https://pypi.org/project/tinytuya/
+
+https://github.com/dulfer/localtuya-device-datapoints?ysclid=lssp7i48vc104440240
