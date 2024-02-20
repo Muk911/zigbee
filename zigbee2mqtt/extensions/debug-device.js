@@ -1,4 +1,4 @@
-const deviceIeeeAddr = '0xa4c138c25cfc85a4';
+const deviceIeeeAddr = '0xa4c138c25cfc85a4'; // адрес проверяемого устройства
 
 class DeviceDebugExtension {
     constructor(zigbee, mqtt, state, publishEntityState, eventBus, settings, logger) {
