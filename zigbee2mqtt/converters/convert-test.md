@@ -13,7 +13,7 @@ class ConverterTestExtension {
         this.logger = logger;
     }
 
-   async start() 
+   async start() {
         for (const definition of utils.loadExternalConverter(converterFileName)) {
            this.logger.info(definition.model);   
         }
