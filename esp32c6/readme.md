@@ -43,3 +43,4 @@
 - https://github.com/xmow49/ESP32H2-Zigbee-Demo
 - https://github.com/xmow49/ESP32H2-SmokeDetector
 - https://github.com/RJSDevel/IKEA_VINDRIKTNING_ESP32_ZIGBEE
+- https://gitlab.com/kasraghu/p1-esp32c6
