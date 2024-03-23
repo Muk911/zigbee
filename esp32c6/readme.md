@@ -33,6 +33,7 @@
 3. Следует напомнить, что для получения данных с сенсоров необходимо настроить режим репортинга. Некоторые системы Умного дома обеспечивают настройку репортинга по умолчанию. Если данные сенсоров все такие не обновляются, необходимо настроить репортинг самостоятельно.
 ### Примеры кода ###
 - https://github.com/espressif/esp-idf/tree/master/examples/zigbee
+- https://github.com/espressif/esp-zigbee-sdk/tree/main/examples
 - https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/Zigbee
 - https://github.com/u236/esp32c6-light-example
 - https://github.com/u236/esp-zb-vindriktning
