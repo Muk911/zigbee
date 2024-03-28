@@ -46,4 +46,5 @@
 - https://github.com/RJSDevel/IKEA_VINDRIKTNING_ESP32_ZIGBEE
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://gitlab.com/kasraghu/p1-esp32c6
+- https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/m5stack/M5NanoC6/tree/main/examples (примеры для C6 без использования Zigbee)
