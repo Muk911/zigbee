@@ -43,12 +43,15 @@
 - https://github.com/Live-Control-Project/MEEF
 - https://github.com/xmow49/ESP32H2-Zigbee-Demo
 - https://github.com/xmow49/ESP32H2-SmokeDetector
+- https://github.com/username-AL/ESP32H2-Zigbee
+- https://github.com/username-AL/ESP32H2-SmokeDetector
 - https://github.com/RJSDevel/IKEA_VINDRIKTNING_ESP32_ZIGBEE
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://gitlab.com/kasraghu/p1-esp32c6
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/wokwi/esp32c6-i2c-lp
 - https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
+- https://github.com/mozolin/esp32c6_zigbee
 - https://github.com/m5stack/M5NanoC6/tree/main/examples (примеры для C6 без использования Zigbee)
 - https://github.com/nlimper/Mini-AP-v3
 - https://github.com/nlimper/Mini-AP-v4
