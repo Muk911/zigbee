@@ -11,7 +11,6 @@ const zhc = require('zigbee-herdsman-converters');
 
 class ConverterListExtension {
     constructor(zigbee, mqtt, state, publishEntityState, eventBus, settings, logger) {
-        logger.info('Загружен  ConverterListExtension');
         this.zigbee = zigbee;
         this.eventBus = eventBus;
         this.logger = logger;
