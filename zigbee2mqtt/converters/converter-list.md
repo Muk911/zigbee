@@ -1,5 +1,6 @@
 # Получение списка загруженных конвертеров Z2M #
 
+Расширение Z2M для отображения списка загруженных конвертеров:
 ```
 import * as zhc from 'zigbee-herdsman-converters';
 import * as settings from '../util/settings';
