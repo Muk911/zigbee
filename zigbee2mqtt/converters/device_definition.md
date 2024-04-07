@@ -172,5 +172,5 @@ const definition = {
 ```
 
 #### Другие материалы ####
-[Официальная документация](https://www.zigbee2mqtt.io/advanced/support-new-devices/01_support_new_devices.html#_2-2-adding-converter-s-for-your-device)
-[Объяснение частей кода внешнего конвертера](converter_parts.md)
+- [Официальная документация](https://www.zigbee2mqtt.io/advanced/support-new-devices/01_support_new_devices.html#_2-2-adding-converter-s-for-your-device)
+- [Объяснение частей кода внешнего конвертера](converter_parts.md)
