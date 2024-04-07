@@ -109,13 +109,11 @@ for (const file of settings.get().external_converters) {
 ...
             const result = await converter.convertSet(localTarget, key, value, meta);
 ```
-## Описание конвертеров ##
-[Определение устройства во внешнем конверторе](device_definition.md)
-[Объяснение кода внешнего конвертера Z2M](converter_parts.md)
 
 ## Написание внешнего конвертера ##
-
-[Расширение существующего конвертера](https://github.com/Muk911/zigbee/blob/main/zigbee2mqtt/converters/expand-converter.md)
+- [Определение устройства во внешнем конверторе](device_definition.md)
+- [Объяснение кода внешнего конвертера Z2M](converter_parts.md)
+- [Расширение существующего конвертера](https://github.com/Muk911/zigbee/blob/main/zigbee2mqtt/converters/expand-converter.md)
 
 [Перехват сообщений от устройства](https://github.com/Muk911/zigbee/tree/main/zigbee2mqtt/extensions#%D1%80%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BF%D0%B5%D1%80%D0%B5%D1%85%D0%B2%D0%B0%D1%82%D0%B0-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9)
 
