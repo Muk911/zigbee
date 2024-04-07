@@ -110,7 +110,8 @@ for (const file of settings.get().external_converters) {
             const result = await converter.convertSet(localTarget, key, value, meta);
 ```
 ## Описание конвертеров ##
-[Определение устройства](device_definition.md)
+[Определение устройства во внешнем конверторе](device_definition.md)
+[Объяснение кода внешнего конвертера Z2M](converter_parts.md)
 
 ## Написание внешнего конвертера ##
 
