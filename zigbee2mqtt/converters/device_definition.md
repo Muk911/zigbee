@@ -3,8 +3,8 @@
 | Переменная   | Описание | Использование |
 |--------------|----------|---------------|
 | vendor       | Наименование производителя | Отображается на карточке устройства    |
-| model        | Код модели  | Отображается на карточке устройства    |
-| zigbeeModel  | ??? |
+| model        | Код модели | Отображается на карточке устройства    |
+| zigbeeModel  | Идентификатор модели, которым устройство представляется при интервью | См. далее |
 | description  | Описание модели | Отображается на карточке устройства    |
 | fingerprint  | Массив "отпечатков пальцев" устройства | См. ниже |
 | whiteLabel   | Бренды и марки, под которыми выпускаются устройства | ??? |
@@ -35,6 +35,10 @@ extend: [light({colorTemp: {range: [153, 370]}})],
 whiteLabel: [{vendor: 'EGLO', model: '900316'}, {vendor: 'EGLO', model: '900317'}, {vendor: 'EGLO', model: '900053'}],
 }
 ```
+#### zigbeeModel ####
+zigbeeModel - это массив идентификаторов модели, используемый в процессе интервью для поиска определения устройства по атрибуту modelIdentifier базового кластера устройства.
+Кроме идентификатора модели должно совпасть также наименование производителя.
+Если переменная zigbeeModel не задана, вместо нее используется значение переменной model.
 
 #### "Отпечатки пальцев" устройства ####
 Во многих случаях однозначный выбор определения устройства по атрибутам manufacturerName и modelIdentifier базового кластера устройства невозможен. Например, под одним номеров модели могут выпускаться устройства с различным количеством конечных точек. Или с отличающимся набором кластеров. В таких случаях для правильного выбора определения устройства применяются "отпечатки пальцев". Это массив специальных структур, содержащих значения и комбинации значений тех атрибутов, которые позволяют различить похожие устройства.
@@ -79,17 +83,23 @@ fingerprint: [
 ```
 fingerprint: tuya.fingerprint('TS130F', ['_TZ3000_j1xl73iw', '_TZ3000_kmsbwdol', '_TZ3000_esynmmox', '_TZ3000_l6iqph4f', '_TZ3000_xdo0hj1k']),
 ```
-Соответствующая функция из модуля tuya.ts обогащает элементы массива по втором параметре значением первого параметра. В результате получается массив:
+Функция tuya.fingerprint() обогащает элементы массива по втором параметре значением первого параметра. В результате получается массив:
 ```
 fingerprint: [{modelID: 'TS130F', manufacturerName: '_TZ3000_j1xl73iw'}, {modelID: 'TS130F', manufacturerName: '_TZ3000_kmsbwdol'}, {modelID: 'TS130F', manufacturerName: '_TZ3000_esynmmox'}, {modelID: 'TS130F', manufacturerName: '_TZ3000_l6iqph4f'}, {modelID: 'TS130F', manufacturerName: '_TZ3000_xdo0hj1k'}],
 ```
 #### White Label ####
-Пример использования whiteLabel:
+whiteLabel - это массив, содержаший список брендов и марок, под которыми может выпускаться устройство. Указанные в whiteLabel значения могут не иметь ничего общего со значениями атрибутов manufacturerName и modelIdentifier базового кластера устройства.
+Примеры использования whiteLabel:
 ```
 whiteLabel: [
-    {
-        model: 'K4027C/L4027C/N4027C/NT4027C', vendor: 'BTicino', description: 'Shutter SW with level control',
-        fingerprint: [{hardwareVersion: 9}, {hardwareVersion: 13}],
-    },
+    {vendor: 'Frient', model: '94430', description: 'Smart Intelligent Smoke Alarm'},
+    {vendor: 'Cavius', model: '2103', description: 'RF SMOKE ALARM, 5 YEAR 65MM'},
+],
+```
+В составе whiteLabel может присутствовать fingerprint, для точного определения бренда и марки устройства:
+```
+whiteLabel: [
+    {vendor: 'Schneider Electric', model: 'W599501', description: 'Wiser smoke alarm', fingerprint: [{modelID: 'W599501'}]},
+    {vendor: 'Schneider Electric', model: '755WSA', description: 'Clipsal Wiser smoke alarm', fingerprint: [{modelID: '755WSA'}]},
 ],
 ```
