@@ -1,4 +1,4 @@
-### Объяснение частей внешнего конвертера Z2M ###
+### Объяснение кода внешнего конвертера Z2M ###
 ```
 const fz = require('zigbee-herdsman-converters/converters/fromZigbee');
 const tz = require('zigbee-herdsman-converters/converters/toZigbee');
