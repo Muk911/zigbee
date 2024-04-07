@@ -18,24 +18,6 @@
 | ota          | 
 | icon         | Миниатюрное изображение устройства в JPG, закодированное Base64 | Отображается на карточке устройства |
 
-```
-{
-zigbeeModel: ['EGLO_ZM_TW'],
-fingerprint: [
-    {
-        type: 'Router', manufacturerName: 'AwoX', modelID: 'TLSR82xx', endpoints: [
-            {ID: 1, profileID: 260, deviceID: 268, inputClusters: [0, 3, 4, 5, 6, 8, 768, 4096], outputClusters: [6, 25]},
-            {ID: 3, profileID: 49152, deviceID: 268, inputClusters: [65360, 65361], outputClusters: [65360, 65361]},
-        ],
-    },
-],
-model: '33955',
-vendor: 'AwoX',
-description: 'LED light with color temperature',
-extend: [light({colorTemp: {range: [153, 370]}})],
-whiteLabel: [{vendor: 'EGLO', model: '900316'}, {vendor: 'EGLO', model: '900317'}, {vendor: 'EGLO', model: '900053'}],
-}
-```
 #### zigbeeModel ####
 zigbeeModel - это массив идентификаторов модели, используемый в процессе интервью для поиска определения устройства по значению атрибута modelIdentifier базового кластера устройства.
 Кроме идентификатора модели должно совпасть также наименование производителя (переменная vendor).
