@@ -22,8 +22,9 @@ const reporting = require('zigbee-herdsman-converters/lib/reporting');
 -- загрузка функций настройки периодических отчетов.
 
 ```
+const types = require('zigbee-herdsman-converters/lib/types');
 const constants = require('zigbee-herdsman-converters/lib/constants');
 const utils = require('zigbee-herdsman-converters/lib/utils');
 ```
--- загрузка констант и вспомогательных функций.
+-- загрузка типов, констант и вспомогательных функций.
 
