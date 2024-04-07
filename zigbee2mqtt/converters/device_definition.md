@@ -153,3 +153,24 @@ exposes.binary('forced_recalibration', ea.STATE_SET, 'ON', 'OFF')
 
 #### extend ####
 Переменная extend содержит массив объектов, похожих на объекты exposes, но расширяющих определение устройства необходимыми объектами-конвертерами и кодом конфигурирования устройства. При полном покрытии описания устройства через extend отпадает необходимость в наличии в описании устройства переменных configure, fromZigbee, toZigbee.
+В список extend могут включаться как стандартные расширения из модуля modernExtend.ts, так и локальные, описанные в модуле внешнего конвертера.
+По названию модуля modernExtend такие объекты называют modernExtend или "современными расширениями".
+Пример использования современных расширений в описании устройства:
+```
+const definition = {
+    zigbeeModel: ['lumi.sens'],
+    model: 'WSDCGQ01LM',
+    vendor: 'Xiaomi',
+    description: 'MiJia temperature & humidity sensor',
+    extend: [
+      // Modern extends are incapsulating fromZigbee, toZigbee, exposes and more.
+      temperature(),
+      humidity(),
+      battery(),
+    ],
+};
+```
+
+#### Другие материалы ####
+[Официальная документация](https://www.zigbee2mqtt.io/advanced/support-new-devices/01_support_new_devices.html#_2-2-adding-converter-s-for-your-device)
+[Объяснение частей кода внешнего конвертера](converter_parts.md)
