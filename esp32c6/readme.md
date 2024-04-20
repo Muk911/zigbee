@@ -59,6 +59,7 @@
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://gitlab.com/kasraghu/p1-esp32c6
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
+- https://github.com/luar123/esphome_zb_sensor
 - https://github.com/wokwi/esp32c6-i2c-lp
 - https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
 - https://github.com/mozolin/esp32c6_zigbee
