@@ -1,0 +1,131 @@
+#ifndef ZIGBEE_MODE_ED
+#error "Zigbee end device mode is not selected in Tools->Zigbee mode"
+#endif
+
+#include "esp_log.h"
+#include "esp_check.h"
+#include "esp_random.h"
+#include "zb_device.h"
+#include "zbesp_runtime.h"
+#include "zb_button.h"
+
+#define TAG "zed_runtime"
+
+#define THERMOSTAT_HYSTERESIS   50 // =0.5°C
+
+uint8_t relay_state = 0;
+uint16_t temperature = 2000;
+int16_t thermostatSetpoint = 25;
+uint8_t thermostatSystemMode = 0;
+int8_t thermostatTemperatureCalibration = 0;
+
+ZbDevice zd(ESP_ZB_DEVICE_TYPE_ED);
+ZbEndpoint ep1(zd, 1, DEVICE_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
+
+ZbBasicCluster zcBasic(ep1, "MEA", "thermostat", 0x01, 0x01);
+ZbIdentifyCluster zcIdentify(ep1);
+
+ZbThermostatCluster zcThermostat(ep1);
+ZbAttribute zaLocalTemperature(zcThermostat, ESP_ZB_ZCL_ATTR_THERMOSTAT_LOCAL_TEMPERATURE_ID, temperature);
+ZbAttribute zaHeatingSetpoint(zcThermostat, ESP_ZB_ZCL_ATTR_THERMOSTAT_OCCUPIED_HEATING_SETPOINT_ID, thermostatSetpoint);
+ZbAttribute zaSystemMode(zcThermostat, ESP_ZB_ZCL_ATTR_THERMOSTAT_SYSTEM_MODE_ID, thermostatSystemMode);
+ZbAttribute zaRunningState(zcThermostat, ESP_ZB_ZCL_ATTR_THERMOSTAT_THERMOSTAT_RUNNING_STATE_ID, (uint8_t) 0);
+ZbAttribute zaLocalTemperatureCalibration(zcThermostat, ESP_ZB_ZCL_ATTR_THERMOSTAT_LOCAL_TEMPERATURE_CALIBRATION_ID, thermostatTemperatureCalibration);
+
+EspZbRuntime rt;
+
+ZbDeviceButton button(zd, GPIO_NUM_9);
+
+void relay_update(void)
+{
+  if (relay_state) {
+    //ESP_LOGI(TAG, "ON");
+    neopixelWrite(RGB_BUILTIN,20,20,20);
+  } else {
+    //ESP_LOGI(TAG, "OFF");
+    neopixelWrite(RGB_BUILTIN,0,0,0);
+  }
+  zaRunningState.setValue(relay_state); 
+  zaRunningState.report();
+}
+
+void setRelayState(uint8_t value)
+{
+  if(relay_state != value) {
+    relay_state = value;
+    relay_update();
+  }
+}
+
+void Thermostat_HeatingSetpointChanged(ZbAttribute *za, uint8_t *data)
+{
+  thermostatSetpoint = *(int16_t*) data;
+  updateThermostatState();
+}
+
+void Thermostat_SystemModeChanged(ZbAttribute *za, uint8_t *data)
+{
+  thermostatSystemMode = *data;
+  updateThermostatState();
+}
+
+void Thermostat_LocalTemperatureCalibrationChanged(ZbAttribute *za, uint8_t *data)
+{
+  thermostatTemperatureCalibration = *(int8_t*) data;
+  zaLocalTemperature.setValue((int16_t) (temperature + 10 * thermostatTemperatureCalibration));
+  updateThermostatState();
+}
+
+void updateThermostatState()
+{
+  if (thermostatSystemMode) {
+    //ESP_LOGI(TAG, "temperature=%d, thermostatTemperatureCalibration=%d, thermostatSetpoint=%d, relay_state=%d", temperature, thermostatTemperatureCalibration, thermostatSetpoint, relay_state);
+    if (temperature + 10 * thermostatTemperatureCalibration <= thermostatSetpoint - THERMOSTAT_HYSTERESIS && !relay_state)
+      setRelayState(1);
+    else if (temperature + 10 * thermostatTemperatureCalibration >= thermostatSetpoint + THERMOSTAT_HYSTERESIS && relay_state)
+      setRelayState(0);
+  } 
+  else 
+    setRelayState(0);   
+}
+
+static void thermostat_task(void *arg)
+{
+  while (1) {
+    // "измеряем" температуру
+    temperature = temperature + (relay_state ? 30 : -30) + (esp_random() % 6 - 3);
+
+    zaLocalTemperature.setValue((int16_t) (temperature + 10 * thermostatTemperatureCalibration));
+    updateThermostatState();
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
+  }
+}
+
+void thermostat_init(void)
+{
+  thermostatSetpoint = 0x07D0;
+  thermostatSystemMode = 0x00;
+  xTaskCreate(thermostat_task, "thermostat", 4096, NULL, 5, NULL);
+}
+
+void setup()
+{
+  rt.init(zd, true);
+
+  zaHeatingSetpoint.onValueChanged(Thermostat_HeatingSetpointChanged);
+  zaSystemMode.onValueChanged(Thermostat_SystemModeChanged);
+  zaLocalTemperatureCalibration.onValueChanged(Thermostat_LocalTemperatureCalibrationChanged);
+    
+  //zaHeatingSetpoint.setPersistent(true, "heating_setpoint");
+  //zaSystemMode.setPersistent(true, "system_mode");
+  //zaLocalTemperatureCalibration.setPersistent(true, "temperature_calibration");
+
+  thermostat_init();
+
+  rt.start();
+}
+
+void loop() {
+  button.tick();
+  vTaskDelay(20 / portTICK_PERIOD_MS);
+}
