@@ -11,16 +11,17 @@
 #include "valve.h"
 
 #define TAG "zed_runtime"
-//#define BISTABLE_VALVE
+
+#define BISTABLE_VALVE
 
 #define ZCL_VERSION         0x03
 #define APP_VERSION         0x01
 #define POWER_SOURCE        0x04
 
-#define VALVE_COUNT 5
+#define VALVE_COUNT 6
 
 ZbDevice zd(ESP_ZB_DEVICE_TYPE_ED);
-ZbEndpoint ep(zd, VALVE_COUNT + 1, DEVICE_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
+ZbEndpoint ep(zd, VALVE_COUNT + 1, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
 ZbBasicCluster zcBasic(ep, "MEA", "valves", APP_VERSION, POWER_SOURCE);
 ZbIdentifyCluster zcIdentify(ep);
 
@@ -31,11 +32,13 @@ ZbAttribute* zaOnTime[VALVE_COUNT];
 
 EspZbRuntime rt;
 
-ZbDeviceButton button(zd, GPIO_NUM_9);
+ZbDeviceButton button(zd, GPIO_NUM_20);
 
 #ifndef REG595
 #define RELAY_COUNT 8
-unsigned int relayPins[RELAY_COUNT] = {16, 14, 12, 13, 15, 0, 4, 5};
+//unsigned int relayPins[RELAY_COUNT] = {2,  4,   5,  6, 15, 7, 9, 3};
+unsigned int relayPins[RELAY_COUNT] = {2, 4, 5, 6, 7, 9, 10, 3}; // для WT0132C6-S5 (ESP32-C6)
+//unsigned int relayPins[RELAY_COUNT] = {16, 14, 12, 13, 15, 0, 4, 5};
 #else
 const int dataPin = 14;
 const int clockPin = 13;
@@ -46,11 +49,11 @@ uint16_t data595 = 0;
 #endif
 
 #define DEFAULT_DURATION 25
-unsigned int valveRelays[VALVE_COUNT] = {3, 4, 5, 7, 8}; // номера реле с единицы
+unsigned int valveRelays[VALVE_COUNT] = {3, 4, 5, 6, 7, 8}; // номера реле с единицы
 Valve* valves[VALVE_COUNT];
 
 #ifdef BISTABLE_VALVE
-unsigned int valvePolarityRelays[2] = {1, 6}; // номера реле для изменения полярности питания клапанов (с единицы)
+unsigned int valvePolarityRelays[2] = {1, 2}; // номера реле для изменения полярности питания клапанов (с единицы)
 #endif
 
 static void OnOff_StateChanged(ZbAttribute *za, uint8_t *data)
@@ -72,14 +75,9 @@ static void OnOff_OnTimeChanged(ZbAttribute *za, uint8_t *data)
 static void Valve_StateChanged(Valve *valve)
 {
   uint16_t i = valve->getUserData();
-  uint16_t state = valve->getState();
+  uint8_t state = valve->getState();
   ESP_LOGI(TAG, "Valve_StateChanged %d: %d", i, state); 
   zaOnOff[i]->setValue(state);
-
-  if (i == 0) {
-    uint8_t v = state ? 20 : 0;
-    neopixelWrite(RGB_BUILTIN,v,v,v);
-  }
 }
 
 void buttonClick(void)
@@ -115,7 +113,7 @@ void Relay_SetPolarity(uint8_t relayNo, uint8_t polarity)
 {
   ESP_LOGI(TAG, "Relay_SetPolarity relayNo=%d polarity=%d", relayNo, polarity);
   for (int i = 0; i < 2; i++) {
-    Relay_SetState(valvePolarityRelays[i - 1], polarity); // если надо включить тригерный клапан, меняем полярность
+    Relay_SetState(valvePolarityRelays[i], polarity); // если надо включить тригерный клапан, меняем полярность
     vTaskDelay(20 / portTICK_PERIOD_MS);
   }
 }
@@ -132,11 +130,11 @@ void relaysInit(void)
     digitalWrite(oePin, LOW); // ??? https://docs.arduino.cc/tutorials/communication/guide-to-shift-out#shftout11
   }
 #else
-  for (int k = 2; k <= RELAY_COUNT; k++) {
-    ESP_LOGI(TAG, "pinMode %d", relayPins[k - 1]);
-    pinMode(relayPins[k - 1], OUTPUT);
-    ESP_LOGI(TAG, "digitalWrite %d - %d", relayPins[k - 1], LOW);
-    digitalWrite(relayPins[k - 1], LOW);
+  for (int i = 0; i < RELAY_COUNT; i++) {
+    ESP_LOGI(TAG, "pinMode %d", relayPins[i]);
+    pinMode(relayPins[i], OUTPUT);
+    ESP_LOGI(TAG, "digitalWrite %d - %d", relayPins[i], LOW);
+    digitalWrite(relayPins[i], LOW);
   }
 #endif
 }
@@ -165,7 +163,7 @@ void setup()
   button.attachClick(buttonClick);
 
   for(int i = 0; i < VALVE_COUNT; i++) {
-    eps[i] = new ZbEndpoint(zd, i + 1, DEVICE_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
+    eps[i] = new ZbEndpoint(zd, i + 1, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
     zcOnOff[i] = new ZbOnOffCluster(*eps[i]);
     zaOnOff[i] = new ZbAttribute(*zcOnOff[i], ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID, (uint8_t) 0);
     zaOnOff[i]->onValueChanged(OnOff_StateChanged);
