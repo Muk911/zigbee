@@ -73,8 +73,7 @@ public:
 
   void setState(uint8_t value)
   {
-    ESP_LOGI(TAG, "setState %d", value);
-  //  if (m_state == value) return;
+    ESP_LOGI(TAG, "Valve::setState %d", value);
     assert(m_relaySetPolarityCB);
 
     if (m_bistable) {
@@ -159,7 +158,6 @@ private:
   RelaySetStateCB m_relaySetStateCB;
   //PolarityRelays* m_polarityRelays; 
   RelaySetPolarityCB m_relaySetPolarityCB;
- 
 };
 
 #endif
