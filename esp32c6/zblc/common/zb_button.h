@@ -4,9 +4,9 @@
 #include <Arduino.h>
 #include <OneButton.h>
 #include "esp_log.h"
-#include "original/button_gpio.h"
-#include "original/button_adc.h"
-#include "original/iot_button.h"
+//#include "original/button_gpio.h"
+//#include "original/button_adc.h"
+//#include "original/iot_button.h"
 #include "zb_device.h"
 
 #define TAG "zb_button"

@@ -254,8 +254,6 @@ public:
     m_dataOwned = false;
     m_isCustom = false;
     m_cluster->addAttribute(this);
-    m_persistent = false;
-    m_persistentKey = NULL;
   }
 
 /*
@@ -302,8 +300,6 @@ public:
     m_dataOwned = false;
     m_isCustom = false;
     m_cluster->addAttribute(this);
-    m_persistent = false;
-    m_persistentKey = NULL;
   }
 
   ZbAttribute(ZbCluster &cluster, uint16_t id, int8_t value) : ZbAttribute(cluster, id) {
@@ -404,8 +400,6 @@ public:
   {
     if(m_valueChangedCB)
       m_valueChangedCB(this, data);
-    if(m_persistent)
-      writePersistent();
   }
 
   uint32_t getValue(void) {
@@ -417,53 +411,6 @@ public:
   }
 
   void report(void);
-  
-  bool readPersistent(void) 
-  {
-    nvs_handle_t handle;
-    assert(m_persistentKey);
-    assert(m_type != ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING);
-
-    nvs_flash_init_partition("nvs");
-    nvs_open_from_partition("nvs", "nvs", NVS_READONLY, &handle);
-    size_t len = getAttrTypeLength(m_type);
-    uint8_t *data = (uint8_t *) malloc(len);
-    esp_err_t err = nvs_get_blob(handle, m_persistentKey, m_data, &len);
-    if(err == ESP_OK) {
-      if (m_data && m_dataOwned) free(m_data);
-      m_data = data;
-      m_dataOwned = true;
-
-      // todo: запись в атрибут
-    }
-    nvs_close(handle);
-    ESP_LOGI(TAG, "readPersistent %s", m_persistentKey);
-    return (err != ESP_OK);
-  }
-
-  void writePersistent(void) 
-  {
-    nvs_handle_t handle;
-    assert(m_persistentKey);
-    assert(m_type != ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING);
-
-    nvs_flash_init_partition("nvs");
-    nvs_open_from_partition("nvs", "nvs", NVS_READWRITE, &handle);
-    nvs_set_blob(handle, m_persistentKey, m_data, getAttrTypeLength(m_type));
-    nvs_commit(handle);
-    nvs_close(handle);
-    ESP_LOGI(TAG, "writePersistent %s", m_persistentKey);
-  }
-
-  bool getPersistent(void) {
-    return m_persistent;
-  }
-
-  void setPersistent(bool value, char *persistentKey = NULL) {
-    m_persistent = value;
-    m_persistentKey = persistentKey;
-    if(m_persistent) readPersistent();
-  }
 
 protected:
   ZbCluster *m_cluster;
@@ -475,8 +422,6 @@ protected:
   short m_floatData;
   bool m_dataOwned;
   bool m_isCustom;
-  bool m_persistent;
-  char *m_persistentKey;
   AttributeValueChangedCB m_valueChangedCB;
 };
 

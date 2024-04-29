@@ -84,8 +84,9 @@ void ZbAttribute::report(void)
 
 void ZbAttribute::updateValue(void)
 {
-  ESP_LOGI(TAG, "ZbAttribute::updateValue(void)");
-  if(getDevice()->joined()) {
+  //ESP_LOGI(TAG, "ZbAttribute::updateValue(void)");
+  // !!! писать в атрибут не только при соединении, а в любом случае после создания атрибутов через SDK
+  if(getDevice()->joined()) {  
     assert(g_runtime);
     ESP_LOGI(TAG, "g_runtime->setAttributeValue endpoint=%d clusterId=0x%04X attrId=0x%04X: 0x%02X", getEndpoint()->getId(), getCluster()->getId(), m_id, *m_data);
     esp_zb_zcl_status_t err = (esp_zb_zcl_status_t) g_runtime->setAttributeValue(getEndpoint()->getId(), getCluster()->getId(), getCluster()->getRole(), m_id, m_data, false);
