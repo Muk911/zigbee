@@ -51,6 +51,7 @@ public:
     m_joined = false;
     m_endpointCount = 0;
     m_endpoints = (ZbEndpoint**) malloc(MAX_DEVICE_ENDPOINTS * sizeof(ZbEndpoint*)); 
+    p_deferredInitCB = NULL;
 	}
 	~ZbDevice() {}
 
@@ -81,12 +82,12 @@ public:
     return m_deviceType;
   }
 
-  void setChannelMask(uint8_t channelMask)
+  void setChannelMask(uint32_t channelMask)
   {
     m_channelMask = channelMask;
   }
 
-  uint8_t getChannelMask(void)
+  uint32_t getChannelMask(void)
   {
     return m_channelMask;
   }
@@ -128,7 +129,7 @@ public:
 private:
   //ZbRuntime *m_runtime;
   uint8_t m_deviceType;
-  uint8_t m_channelMask;
+  uint32_t m_channelMask;
   uint8_t m_maxChildren;
   bool m_installCodePolicy;
   uint16_t m_panId;
@@ -410,6 +411,14 @@ public:
     return m_data;
   }
 
+  void *getUserPtr(void) {
+    return m_userPtr;
+  }
+  
+  void setUserPtr(void *userPtr) {
+    m_userPtr = userPtr;
+  }
+  
   void report(void);
 
 protected:
@@ -423,6 +432,7 @@ protected:
   bool m_dataOwned;
   bool m_isCustom;
   AttributeValueChangedCB m_valueChangedCB;
+  void *m_userPtr;
 };
 
 class ZbCustomAttribute : public ZbAttribute {
@@ -605,8 +615,12 @@ public:
   void start(void) {}
 
   virtual void leave(void) {}
-  virtual uint8_t setAttributeValue(uint8_t endpoint, uint16_t clusterId, uint8_t clusterRole, uint16_t attrId, void *value, bool check) {}
-  virtual uint8_t reportAttribute(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId) {}
+  virtual uint8_t setAttributeValue(uint8_t endpoint, uint16_t clusterId, uint8_t clusterRole, uint16_t attrId, void *value, bool check) {
+    return ESP_OK;    
+  }
+  virtual uint8_t reportAttribute(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId) {
+    return ESP_OK;
+  }
 
 protected:
   ZbDevice *m_device;

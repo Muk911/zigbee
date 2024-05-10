@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "esp_log.h"
 #include "zcl/esp_zigbee_zcl_command.h"
 #include "zb_zcl.h"
@@ -111,7 +111,7 @@ void fillInfo()
       {0x0003,                                                    ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uintZero}, //0x0000 – 0x0800
       {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_SCALED_VALUE_ID,      ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uintZero}, //MinScaledValue – MaxScaledValue
       {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MIN_SCALED_VALUE_ID,  ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uint16Unknown}, //0x8001-0x7ffe
-      {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MAX_SACLED_VALUE_ID,  ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uint16Unknown}, //0x8002-0x7fff
+      {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MAX_SCALED_VALUE_ID,  ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uint16Unknown}, //0x8002-0x7fff
       {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_SCALED_TOLERANCE_ID,  ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uintZero}, //0x0000 – 0x0800 
       {ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_SCALE_ID,             ESP_ZB_ZCL_ATTR_TYPE_U16,  ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, false, &uintZero} //0x81 – 0x7f
     };

@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "esp_log.h"
 #include "zb_zcl.h"
 #include "zb_device.h"
