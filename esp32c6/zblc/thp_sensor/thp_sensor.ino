@@ -12,7 +12,8 @@
 
 #define TAG "zed_runtime"
 
-uint16_t temperature = 2000, humidity = 7000, pressure = 1000;
+int16_t temperature = 2000, humidity = 7000;
+uint16_t pressure = 1000;
 
 ZbDevice zd(ESP_ZB_DEVICE_TYPE_ED); // ESP_ZB_DEVICE_TYPE_ROUTER
 ZbEndpoint ep1(zd, 1, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
@@ -32,8 +33,8 @@ ZbAttribute zaHumidityMaxValue(zcHumidityMeas, ESP_ZB_ZCL_ATTR_REL_HUMIDITY_MEAS
 
 ZbPressureMeasCluster zcPressureMeas(ep1);
 ZbAttribute zaPressureValue(zcPressureMeas, ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_VALUE_ID, pressure);
-ZbAttribute zaPressureMinValue(zcPressureMeas, ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MIN_VALUE_ID, (int16_t) 0x8000);
-ZbAttribute zaPressureMaxValue(zcPressureMeas, ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MAX_VALUE_ID, (int16_t) 0x8000);
+ZbAttribute zaPressureMinValue(zcPressureMeas, ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MIN_VALUE_ID, (uint16_t) 0x8000);
+ZbAttribute zaPressureMaxValue(zcPressureMeas, ESP_ZB_ZCL_ATTR_PRESSURE_MEASUREMENT_MAX_VALUE_ID, (uint16_t) 0x8000);
 
 EspZbRuntime rt;
 
