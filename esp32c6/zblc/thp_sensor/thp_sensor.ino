@@ -15,7 +15,7 @@
 uint16_t temperature = 2000, humidity = 7000, pressure = 1000;
 
 ZbDevice zd(ESP_ZB_DEVICE_TYPE_ED); // ESP_ZB_DEVICE_TYPE_ROUTER
-ZbEndpoint ep1(zd, 1, DEVICE_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
+ZbEndpoint ep1(zd, 1, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
 
 ZbBasicCluster zcBasic(ep1, "MEA", "thp.sensor", 0x01, 0x04);
 ZbIdentifyCluster zcIdentify(ep1);
