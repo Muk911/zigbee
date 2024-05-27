@@ -48,10 +48,11 @@ public:
     m_maxChildren = 16;
     m_panId = 0x1a62;  //!!!!!!!
     m_channelMask = ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK;
+    m_started = false;
     m_joined = false;
+    m_leaveAfterStart = false;
     m_endpointCount = 0;
     m_endpoints = (ZbEndpoint**) malloc(MAX_DEVICE_ENDPOINTS * sizeof(ZbEndpoint*)); 
-    p_deferredInitCB = NULL;
 	}
 	~ZbDevice() {}
 
@@ -69,13 +70,23 @@ public:
 
   ZbEndpoint* findEndpoint(uint8_t id);
 
+  bool started(void) {
+    return m_started;
+  }
+
+  void setStarted(bool value) {
+    m_started = value;
+    if (m_leaveAfterStart)
+      leave();      
+  }
+
   bool joined(void) {
     return m_joined;
   }
 
   void setJoined(bool value) {
     m_joined = value;
-    ESP_LOGI(TAG, "joined=%d", value);
+    //ESP_LOGI(TAG, "joined=%d", value);
   }
 
   uint8_t getDeviceType(void) {
@@ -111,6 +122,13 @@ public:
   void leave(void); 
   void reportNow(void);
   void appendMandatories(void);
+
+  void leaveAfterStart() {
+    if (m_started)
+      leave();
+    else
+      m_leaveAfterStart = true;
+  }
  
   void onDeferrerInit(DeferredInitCB deferredInitCB) {
     p_deferredInitCB = deferredInitCB;
@@ -135,7 +153,9 @@ private:
   uint16_t m_panId;
   uint8_t m_extpanId[8] = {0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD};
   uint8_t m_networkKey[16] = {1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 13};
+  bool m_started;
   bool m_joined;
+  bool m_leaveAfterStart;
   int m_endpointCount;
   ZbEndpoint **m_endpoints; //MAX_DEVICE_ENDPOINTS
 };
@@ -411,14 +431,6 @@ public:
     return m_data;
   }
 
-  void *getUserPtr(void) {
-    return m_userPtr;
-  }
-  
-  void setUserPtr(void *userPtr) {
-    m_userPtr = userPtr;
-  }
-  
   void report(void);
 
 protected:
@@ -432,7 +444,6 @@ protected:
   bool m_dataOwned;
   bool m_isCustom;
   AttributeValueChangedCB m_valueChangedCB;
-  void *m_userPtr;
 };
 
 class ZbCustomAttribute : public ZbAttribute {
@@ -615,12 +626,8 @@ public:
   void start(void) {}
 
   virtual void leave(void) {}
-  virtual uint8_t setAttributeValue(uint8_t endpoint, uint16_t clusterId, uint8_t clusterRole, uint16_t attrId, void *value, bool check) {
-    return ESP_OK;    
-  }
-  virtual uint8_t reportAttribute(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId) {
-    return ESP_OK;
-  }
+  virtual uint8_t setAttributeValue(uint8_t endpoint, uint16_t clusterId, uint8_t clusterRole, uint16_t attrId, void *value, bool check) {}
+  virtual uint8_t reportAttribute(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId) {}
 
 protected:
   ZbDevice *m_device;
