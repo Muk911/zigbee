@@ -115,10 +115,6 @@ void setup()
   zaHeatingSetpoint.onValueChanged(Thermostat_HeatingSetpointChanged);
   zaSystemMode.onValueChanged(Thermostat_SystemModeChanged);
   zaLocalTemperatureCalibration.onValueChanged(Thermostat_LocalTemperatureCalibrationChanged);
-    
-  //zaHeatingSetpoint.setPersistent(true, "heating_setpoint");
-  //zaSystemMode.setPersistent(true, "system_mode");
-  //zaLocalTemperatureCalibration.setPersistent(true, "temperature_calibration");
 
   thermostat_init();
 
