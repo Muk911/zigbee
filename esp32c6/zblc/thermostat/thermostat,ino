@@ -14,7 +14,7 @@
 #define THERMOSTAT_HYSTERESIS   50 // =0.5°C
 
 uint8_t relay_state = 0;
-uint16_t temperature = 2000;
+int16_t temperature = 2000;
 int16_t thermostatSetpoint = 25;
 uint8_t thermostatSystemMode = 0;
 int8_t thermostatTemperatureCalibration = 0;
