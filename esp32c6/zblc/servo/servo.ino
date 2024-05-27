@@ -10,7 +10,7 @@
 #define TAG "zed_runtime"
 
 ZbDevice zd(ESP_ZB_DEVICE_TYPE_ED);
-ZbEndpoint ep1(zd, 1, DEVICE_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
+ZbEndpoint ep1(zd, 1, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_TEST_DEVICE_ID);
 
 ZbBasicCluster zcBasic(ep1, "MEA", "servo", 0x01, 0x01);
 ZbIdentifyCluster zcIdentify(ep1);
