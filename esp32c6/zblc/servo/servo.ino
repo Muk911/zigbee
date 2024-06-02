@@ -1,11 +1,8 @@
-#ifndef ZIGBEE_MODE_ED
-#error "Zigbee end device mode is not selected in Tools->Zigbee mode"
-#endif
-
 #include "zb_device.h"
 #include "zbesp_runtime.h"
 #include "zb_button.h"
 #include "esp_servo.h"
+#include "esp_nvs_flash.h"
 
 #define TAG "zed_runtime"
 
@@ -16,7 +13,7 @@ ZbBasicCluster zcBasic(ep1, "MEA", "servo", 0x01, 0x01);
 ZbIdentifyCluster zcIdentify(ep1);
 
 ZbLevelControlCluster zcLevelControl(ep1);
-ZbAttribute zaCurrentLevel(zcLevelControl, ESP_ZB_ZCL_ATTR_LEVEL_CONTROL_CURRENT_LEVEL_ID, (uint8_t) 23);
+ZbAttribute zaCurrentLevel(zcLevelControl, ESP_ZB_ZCL_ATTR_LEVEL_CONTROL_CURRENT_LEVEL_ID, (uint8_t) 1);
 ZbAttribute zaMinLevel(zcLevelControl, ESP_ZB_ZCL_ATTR_LEVEL_CONTROL_MIN_LEVEL_ID, (uint8_t) 1);
 ZbAttribute zaMaxLevel(zcLevelControl, ESP_ZB_ZCL_ATTR_LEVEL_CONTROL_MAX_LEVEL_ID, (uint8_t) 254);
 
@@ -27,6 +24,8 @@ ZbAttribute zaOnOff(zcOnOff, ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID, (uint8_t) 0);
 EspZbRuntime rt;
 
 ZbDeviceButton button(zd, GPIO_NUM_9);
+
+NvsVariable nvCurrentLevel(1, "CurrentLevel");
 
 EspServo espServo;
 ServoAdapter servo(10, 1, 254);
@@ -54,6 +53,8 @@ void servoComplete(ServoAdapter *sa)
 
 void setup()
 {
+  zaCurrentLevel.setValue(nvCurrentLevel.readInt(1));
+
   servo.onMove(servoMove);
   servo.onComplete(servoComplete);
 
