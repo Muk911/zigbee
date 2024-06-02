@@ -35,6 +35,7 @@ extern ZbRuntime *g_runtime;
 
 typedef void (*AttributeValueChangedCB)(ZbAttribute *za, uint8_t *data);
 typedef uint8_t (*DeferredInitCB)(void);
+typedef void (*DeviceStartedCB)(void);
 
 //typedef uint8_t (*SetAttributeValueFunc)(uint8_t endpoint, uint16_t clusterId, uint8_t clusterRole, uint16_t attrId, void *value, bool check);
 //typedef uint8_t (*ReportAttributeFunc)(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId);
@@ -48,6 +49,7 @@ public:
     m_maxChildren = 16;
     m_panId = 0x1a62;  //!!!!!!!
     m_channelMask = ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK;
+    m_registered = false;
     m_started = false;
     m_joined = false;
     m_leaveAfterStart = false;
@@ -70,12 +72,22 @@ public:
 
   ZbEndpoint* findEndpoint(uint8_t id);
 
+  bool registered(void) {
+    return m_registered;
+  }
+
+  void setRegistered(bool value) {
+    m_registered = value;
+  }
+
   bool started(void) {
     return m_started;
   }
 
   void setStarted(bool value) {
     m_started = value;
+    if (m_deviceStartedCB)
+      m_deviceStartedCB();
     if (m_leaveAfterStart)
       leave();      
   }
@@ -134,6 +146,10 @@ public:
     p_deferredInitCB = deferredInitCB;
   }
 
+  void onDeviceStarted(DeviceStartedCB deviceStartedCB) {
+    m_deviceStartedCB = deviceStartedCB;
+  }
+
  // void setPanId(uint16_t panId);
  // void setExtpanPanId(uint16_t *extpanId);
  // void setNetworkKey(uint16_t *networkKey);
@@ -153,11 +169,13 @@ private:
   uint16_t m_panId;
   uint8_t m_extpanId[8] = {0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD};
   uint8_t m_networkKey[16] = {1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 13};
+  bool m_registered;
   bool m_started;
   bool m_joined;
   bool m_leaveAfterStart;
   int m_endpointCount;
   ZbEndpoint **m_endpoints; //MAX_DEVICE_ENDPOINTS
+  DeviceStartedCB m_deviceStartedCB;
 };
 
 class ZbEndpoint {
@@ -266,90 +284,90 @@ private:
 
 class ZbAttribute {
 public:
-  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, void *data) { // data - ZCL представление, копирование не выполняется
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, void *data, uint16_t dataLen) {
     m_cluster = &cluster;
     m_id = id;
     m_type = type;
     m_access = access;
-    m_data = (uint8_t *) data;
-    m_dataOwned = false;
-    m_isCustom = false;
-    m_cluster->addAttribute(this);
-  }
-
-/*
-  void setStringData(char *data) {
-    if (m_data && m_dataOwned) free(m_data);
-    int len = strlen(data);
-    char *buf = (char *) malloc(len + 1);
-    memcpy(buf, data, len);
-    buf[len] = 0;
-    m_data = buf;
-    m_dataOwned = true;
-  }
-
-  void setData(void *data) {
-    if(!data) {
-      m_data = NULL;
+    if (dataLen > 0) {
+      m_data = (uint8_t *) malloc(dataLen);
+      memcpy(m_data, data, dataLen);
+      m_dataOwned = true;
+    }
+    else {
+      m_data = (uint8_t *) data;
       m_dataOwned = false;
     }
-    else if(isStringAttrType(m_type)) 
-      setStringData(data);
-    else {
-      uint8_t len = getAttrTypeLength();
-      m_data = (uint8_t *) malloc(len);
-      memcpy(m_data, data, len);
-      m_dataOwned = true;    
-    }
-  }
-*/
-
-  ZbAttribute(ZbCluster &cluster, uint16_t id, void *data = NULL) {
-    m_cluster = &cluster;
-    m_id = id;
-    zb_attr_info_t *attr = findClusterAttrInfo(cluster.getId(), id);
-    if(!attr) {
-      ESP_LOGI(TAG, "Attribute %04X %04X not found.", cluster.getId(), id);
-      return;
-    }
-    m_type = attr->attrType;
-    m_access = attr->attrAccess;
-    if(data)
-      m_data = (uint8_t *) data;
-    else
-      m_data = (uint8_t *) attr->defaultValue;
-    m_dataOwned = false;
     m_isCustom = false;
     m_cluster->addAttribute(this);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, int8_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, int8_t value) : ZbAttribute(cluster, id, type, access, &value, 1) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, int16_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, int16_t value) : ZbAttribute(cluster, id, type, access, &value, 2) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, int32_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, int32_t value) : ZbAttribute(cluster, id, type, access, &value, 4) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, uint8_t value) : ZbAttribute(cluster, id, type, access, &value, 1) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, uint16_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, uint16_t value) : ZbAttribute(cluster, id, type, access, &value, 2) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, uint32_t value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, uint32_t value) : ZbAttribute(cluster, id, type, access, &value, 4) {
+    //setValue(value);
   }
 
-  ZbAttribute(ZbCluster &cluster, uint16_t id, float value) : ZbAttribute(cluster, id) {
-    setValue(value);
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, float value) : ZbAttribute(cluster, id, type, access, &value, sizeof(float)) {
+    //setValue(value);
   }
+
+  //ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, char *value) : ZbAttribute(cluster, id, type, access, value, strlen(value) + 1) {
+    //setValue(value);
+  //}
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, void *data, uint16_t dataLen) : ZbAttribute(cluster, id, 0, 0, data, dataLen) {
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, int8_t value) : ZbAttribute(cluster, id, 0, 0, &value, 1) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, int16_t value) : ZbAttribute(cluster, id, 0, 0, &value, 2) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, int32_t value) : ZbAttribute(cluster, id, 0, 0, &value, 4) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint8_t value) : ZbAttribute(cluster, id, 0, 0, &value, 1) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint16_t value) : ZbAttribute(cluster, id, 0, 0, &value, 2) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, uint32_t value) : ZbAttribute(cluster, id, 0, 0, &value, 4) {
+    //setValue(value);
+  }
+
+  ZbAttribute(ZbCluster &cluster, uint16_t id, float value) : ZbAttribute(cluster, id, 0, 0, &value, sizeof(float)) {
+    //setValue(value);
+  }
+
+  //ZbAttribute(ZbCluster &cluster, uint16_t id, char *value) : ZbAttribute(cluster, id, 0, 0, value, strlen(value) + 1) {
+    //setValue(value);
+  //}
 
   ~ZbAttribute() {
     if (m_data && m_dataOwned) free(m_data);
@@ -375,8 +393,16 @@ public:
     return m_type;
   }
 
+  void setType(uint8_t value) {
+    m_type = value;
+  }
+
   uint8_t getAccess(void) {
     return m_access;
+  }
+
+  void setAccess(uint8_t value) {
+    m_access = value;
   }
 
   bool isCustom(void) {
@@ -391,26 +417,69 @@ public:
 */
   void test(void);
 
+  void setData(void *data, uint16_t dataLen);
+
+/*
+  void setData(void *data) {
+    if(!data) {
+      m_data = NULL;
+      m_dataOwned = false;
+    }
+    else if(isStringAttrType(m_type)) 
+      setStringData(data);
+    else {
+      uint8_t len = getAttrTypeLength();
+      m_data = (uint8_t *) malloc(len);
+      memcpy(m_data, data, len);
+      m_dataOwned = true;    
+    }
+  }
+*/
   void setValue(int8_t value) {
-    setValue((int32_t) value);
+    int32_t value32 = value;
+    setData(&value32, 4);
   }
 
   void setValue(int16_t value) {
-    setValue((int32_t) value);
+    int32_t value32 = value;
+    setData(&value32, 4);
+  }
+
+  void setValue(int32_t value) {
+    setData(&value, 4);
   }
 
   void setValue(uint8_t value) {
-    setValue((uint32_t) value);
+    uint32_t value32 = value;
+    setData(&value32, 4);
   }
 
   void setValue(uint16_t value) {
-    setValue((uint32_t) value);
+    uint32_t value32 = value;
+    setData(&value32, 4);
   }
 
-  void setValue(int32_t value);
-  void setValue(uint32_t value);
-  void setValue(float value);
-  void setValue(char* value);
+  void setValue(uint32_t value) {
+    setData(&value, 4);
+  }
+  
+  void setValue(float value) {
+    setData(&value, sizeof(float));
+  }
+ 
+  void setStrValue(char* value)
+  {
+    //ESP_LOGI(TAG, "ZbAttribute::setValue(char* value)");
+    if (m_data && m_dataOwned) free(m_data);
+  //  if(m_type == ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING || m_type == ESP_ZB_ZCL_ATTR_TYPE_OCTET_STRING) { // дополнить!!!
+    int len = strlen(value);
+    m_data = (uint8_t *) malloc(len + 1);
+    m_data[0] = len;
+    memcpy(m_data + 1, value, len);
+    m_dataOwned = true;
+    updateValue();
+  }
+
   void updateValue(void);
 
   void onValueChanged(AttributeValueChangedCB valueChangedCB) {
@@ -423,8 +492,12 @@ public:
       m_valueChangedCB(this, data);
   }
 
-  uint32_t getValue(void) {
-    return m_intData;
+  uint32_t getUInt(void) {
+    return *(uint32_t*) m_data;
+  }
+
+  int32_t getInt(void) {
+    return *(int32_t*) m_data;
   }
 
   uint8_t *getData(void) {
@@ -448,7 +521,7 @@ protected:
 
 class ZbCustomAttribute : public ZbAttribute {
 public:
-  ZbCustomAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, void *data) : ZbAttribute(cluster, id, type, access, data) {
+  ZbCustomAttribute(ZbCluster &cluster, uint16_t id, uint8_t type, uint8_t access, void *data, uint16_t dataLen) : ZbAttribute(cluster, id, type, access, data, dataLen) {
     m_isCustom = true;
   }
 };
@@ -474,13 +547,13 @@ public:
     m_softwareBuildID = "1000-0001";
 
     //ESP_LOGI(TAG, "ZbBasicCluster()");
-    m_attrManufacturerName = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, NULL);
-    m_attrManufacturerName->setValue(m_manufacturerName);
-    m_attrModelIdentifier = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, NULL);
-    m_attrModelIdentifier->setValue(m_modelIdentifier);
-    m_attrZclVersion = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_ZCL_VERSION_ID, ESP_ZB_ZCL_ATTR_TYPE_U8, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &m_zclVersion);
-    m_attrPowerSource = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_POWER_SOURCE_ID, ESP_ZB_ZCL_ATTR_TYPE_8BIT_ENUM, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &m_powerSource);
-    m_attrApplicationVersion = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_APPLICATION_VERSION_ID, ESP_ZB_ZCL_ATTR_TYPE_U8, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &m_applicationVersion);
+    m_attrManufacturerName = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, NULL, 0);
+    m_attrManufacturerName->setStrValue(m_manufacturerName);
+    m_attrModelIdentifier = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, NULL, 0);
+    m_attrModelIdentifier->setStrValue(m_modelIdentifier);
+    m_attrZclVersion = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_ZCL_VERSION_ID, m_zclVersion);
+    m_attrPowerSource = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_POWER_SOURCE_ID, m_powerSource);
+    m_attrApplicationVersion = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_BASIC_APPLICATION_VERSION_ID, m_applicationVersion);
   }
 
   ~ZbBasicCluster() {
@@ -586,7 +659,7 @@ public:
     m_otaData.hw_version = 0x0001;
     m_otaData.max_data_size = 0x40; 
 
-    m_attrOtaUpgradeClientData = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_OTA_UPGRADE_CLIENT_DATA_ID, &m_otaData);
+    m_attrOtaUpgradeClientData = new ZbAttribute(*(ZbCluster*)this, ESP_ZB_ZCL_ATTR_OTA_UPGRADE_CLIENT_DATA_ID, &m_otaData, sizeof(esp_zb_zcl_ota_upgrade_client_variable_t));
   }
 
   uint16_t getOtaManufacturer(void) {

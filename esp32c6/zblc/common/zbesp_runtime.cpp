@@ -4,7 +4,7 @@ esp_zb_get_short_address() - быстрый способ идентификац�
 https://github.com/espressif/esp-zigbee-sdk/issues/84
 */
 
-//#include <Arduino.h>
+#include <Arduino.h>
 #include "esp_log.h"
 #include "esp_check.h"
 #include "freertos/FreeRTOS.h"
@@ -13,13 +13,15 @@ https://github.com/espressif/esp-zigbee-sdk/issues/84
 #include "esp_zigbee_core.h"
 #include "esp_ota_ops.h"
 #include "nvs_flash.h"
-//#include "ha/esp_zigbee_ha_standard.h"
-//#include "zcl/esp_zigbee_zcl_command.h"
-//#include "zdo/esp_zigbee_zdo_command.h"
-//#include "zb_crc16.h"
+#include "ha/esp_zigbee_ha_standard.h"
+#include "zcl/esp_zigbee_zcl_command.h"
+#include "zdo/esp_zigbee_zdo_command.h"
+//#include "zboss_api_zdo.h"
+#include "nvs_flash.h"
+#include "zb_crc16.h"
 #include "zb_zcl.h"
 #include "zbesp_runtime.h"
-//#include "zbesp_debug.h"
+#include "zbesp_debug.h"
 
 #define TAG "zbesp_runtime"
 
@@ -40,7 +42,7 @@ static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask)
 
 // https://github.com/espressif/esp-zigbee-sdk/blob/main/examples/esp_zigbee_HA_sample/HA_color_dimmable_light/main/esp_zb_light.c
 // https://github.com/espressif/esp-idf/blob/master/examples/zigbee/esp_zigbee_gateway/main/esp_zigbee_gateway.c
-extern "C" void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
+void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
 {
     uint32_t *p_sg_p = signal_struct->p_app_signal;
     esp_err_t err_status = signal_struct->esp_err_status;
@@ -127,12 +129,12 @@ static void set_attr_value_cb(uint8_t status, uint8_t endpoint, uint16_t cluster
     }
     ZbCluster *cluster = ep->findCluster(cluster_id);
     if(!cluster) {
-      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X not found.", endpoint, cluster_id);
+      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X not found.", cluster_id);
       return;
     }
     ZbAttribute *attr = cluster->findAttribute(attr_id);
     if(!attr) {
-      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X Attribute 0x%04X not found.", endpoint, cluster_id, attr_id);
+      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X Attribute 0x%04X not found.", attr_id);
       return;
     }
     attr->valueChanged((uint8_t *)data);
@@ -149,7 +151,7 @@ static void set_attr_value_cb(uint8_t status, uint8_t endpoint, uint16_t cluster
             break;
     }
 */
-    ESP_LOGI(TAG, "endpoint %d cluster 0x%04X attribute 0x%04X value updated %d", endpoint, cluster_id, attr_id, *(uint8_t*)data);
+    ESP_LOGI(TAG, "endpoint %d cluster 0x%04X attribute 0x%04X value updated: int8=%d, int16=%d, ", endpoint, cluster_id, attr_id, *(int8_t*)data, *(int16_t*)data);
 }
 
 // Handle the attributes
@@ -223,8 +225,8 @@ static esp_err_t zb_read_attr_resp_handler(const esp_zb_zcl_cmd_read_attr_resp_m
         switch (message->info.cluster) {
         case ESP_ZB_ZCL_CLUSTER_ID_TIME:
             ESP_LOGI(TAG, "Server time received %lu", *(uint32_t*) variable->attribute.data.value);
-            //struct timeval tv;
-            //tv.tv_sec = *(uint32_t*) variable->attribute.data.value + 946684800 - 1080; //after adding OTA cluster time shifted to 1080 sec... strange issue ... 
+            struct timeval tv;
+            tv.tv_sec = *(uint32_t*) variable->attribute.data.value + 946684800 - 1080; //after adding OTA cluster time shifted to 1080 sec... strange issue ... 
             //settimeofday(&tv, NULL);
             //time_updated = true;
             break;
@@ -321,11 +323,11 @@ static esp_err_t zb_configure_report_resp_handler(const esp_zb_zcl_cmd_config_re
 }
 */
 
-extern "C" esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t callback_id, const void *message)
+static esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t callback_id, const void *message)
 {
     esp_err_t ret = ESP_OK;
 
-    ESP_LOGI(TAG, "Receive Zigbee action (0x%x) callback", callback_id); //, get_core_action_callback_name(callback_id));
+    ESP_LOGI(TAG, "Receive Zigbee action (0x%x - %s) callback", callback_id, get_core_action_callback_name(callback_id));
     switch (callback_id) {
     //case ESP_ZB_CORE_REPORT_ATTR_CB_ID:  // Attribute Report - для серверных кластеров?
         //ret = zb_attribute_reporting_handler((esp_zb_zcl_report_attr_message_t *)message);
@@ -341,6 +343,9 @@ extern "C" esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t cal
     //case ESP_ZB_CORE_CMD_REPORT_CONFIG_RESP_CB_ID: // Configure report response
       //ret = zb_configure_report_resp_handler((esp_zb_zcl_cmd_config_report_resp_message_t *)message);
       //  break;
+    case ESP_ZB_CORE_CMD_DISC_ATTR_RESP_CB_ID:
+        return ESP_ERR_NOT_SUPPORTED;
+      //esp_zb_zcl_cmd_discover_attributes_resp_message_t
     case ESP_ZB_CORE_OTA_UPGRADE_VALUE_CB_ID: // Upgrade OTA
         return ota_handler(*(esp_zb_zcl_ota_upgrade_value_message_t*) message);  
     default:
@@ -411,7 +416,7 @@ esp_err_t zbesp_cluster_list_add_cluster(esp_zb_cluster_list_t *cluster_list, ui
       return esp_zb_cluster_list_add_fan_control_cluster(cluster_list, attr_list, role_mask);
 //    ESP_ZB_ZCL_CLUSTER_ID_DEHUMID_CONTROL:     
     case ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT_UI_CONFIG:
-      return esp_zb_cluster_list_add_thermostat_ui_config_cluster(cluster_list, attr_list, role_mask);
+      esp_zb_cluster_list_add_thermostat_ui_config_cluster(cluster_list, attr_list, role_mask);
     case ESP_ZB_ZCL_CLUSTER_ID_COLOR_CONTROL:
       return esp_zb_cluster_list_add_color_control_cluster(cluster_list, attr_list, role_mask);
 //    ESP_ZB_ZCL_CLUSTER_ID_BALLAST_CONFIG:
@@ -421,7 +426,8 @@ esp_err_t zbesp_cluster_list_add_cluster(esp_zb_cluster_list_t *cluster_list, ui
       //ESP_LOGI(TAG, "zbesp_cluster_list_add_cluster ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT");
       return esp_zb_cluster_list_add_temperature_meas_cluster(cluster_list, attr_list, role_mask);
     case ESP_ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT:
-      return esp_zb_cluster_list_add_pressure_meas_cluster(cluster_list, attr_list, role_mask);  
+      return esp_zb_cluster_list_add_pressure_meas_cluster(cluster_list, attr_list, role_mask);
+      break;      
     case ESP_ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT:
       return esp_zb_cluster_list_add_humidity_meas_cluster(cluster_list, attr_list, role_mask);
     case ESP_ZB_ZCL_CLUSTER_ID_OCCUPANCY_SENSING:
@@ -436,105 +442,106 @@ esp_err_t zbesp_cluster_list_add_cluster(esp_zb_cluster_list_t *cluster_list, ui
       return esp_zb_cluster_list_add_electrical_meas_cluster(cluster_list, attr_list, role_mask);
     case ESP_ZB_ZCL_CLUSTER_ID_METERING:
       return esp_zb_cluster_list_add_metering_cluster(cluster_list, attr_list, role_mask);
+    default:
+      return esp_zb_cluster_list_add_custom_cluster(cluster_list, attr_list, role_mask);
   }
-  return ESP_OK; //?
 }
 
 //uint16_t attr_crc;
 
 // esp_err_t zbesp_cluster_add_attr(esp_zb_attribute_list_t *attr_list, uint16_t cluster_id, uint16_t attr_id, uint8_t attr_type, uint8_t attr_access, void *value_p)
-esp_err_t zbesp_cluster_add_attr(esp_zb_attribute_list_t *attr_list, uint16_t cluster_id, uint16_t attr_id, void *value_p) 
+esp_err_t zbesp_cluster_add_attr(esp_zb_attribute_list_t *attr_list, uint16_t cluster_id, uint16_t attr_id, uint8_t attr_type, uint8_t attr_access, void *value_p) 
 { 
   //crc16_update(&attr_crc, (uint8_t *)&attr_id, sizeof(attr_id));
-  switch(cluster_id) {
-    case ESP_ZB_ZCL_CLUSTER_ID_BASIC:
-      //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_BASIC");
-      return esp_zb_basic_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG:
-      return esp_zb_power_config_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_DEVICE_TEMP_CONFIG:
-    case ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY:
-      //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY");
-      return esp_zb_identify_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_GROUPS:
-      return esp_zb_groups_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_SCENES:
-      return esp_zb_scenes_cluster_add_attr(attr_list, attr_id, value_p);
-#ifdef USE_ON_OFF_CLUSTER
-    case ESP_ZB_ZCL_CLUSTER_ID_ON_OFF:
-      //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_ON_OFF");
-      return esp_zb_on_off_cluster_add_attr(attr_list, attr_id, value_p);
-#endif // USE_ON_OFF_CLUSTER
-    case ESP_ZB_ZCL_CLUSTER_ID_ON_OFF_SWITCH_CONFIG:
-      return esp_zb_on_off_switch_config_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_LEVEL_CONTROL:
-      return esp_zb_level_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_ALARMS:
-    case ESP_ZB_ZCL_CLUSTER_ID_TIME:
-      return esp_zb_time_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_RSSI_LOCATION:
-    case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT:
-      return esp_zb_analog_input_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT:
-      return esp_zb_analog_output_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_VALUE:
-      return esp_zb_analog_value_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_BINARY_INPUT:
-      return esp_zb_binary_input_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_BINARY_OUTPUT:
-//    ESP_ZB_ZCL_CLUSTER_ID_BINARY_VALUE:
-//    ESP_ZB_ZCL_CLUSTER_ID_MULTI_INPUT:
-//    ESP_ZB_ZCL_CLUSTER_ID_MULTI_OUTPUT:
-    case ESP_ZB_ZCL_CLUSTER_ID_MULTI_VALUE:
-      return esp_zb_multistate_value_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_COMMISSIONING:
-    case ESP_ZB_ZCL_CLUSTER_ID_OTA_UPGRADE:
-      return esp_zb_ota_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_POLL_CONTROL:
-//    ESP_ZB_ZCL_CLUSTER_ID_GREEN_POWER:    
-//    ESP_ZB_ZCL_CLUSTER_ID_KEEP_ALIVE:    
-    case ESP_ZB_ZCL_CLUSTER_ID_SHADE_CONFIG:
-      return esp_zb_shade_config_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_DOOR_LOCK:
-      return esp_zb_door_lock_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_WINDOW_COVERING:
-      return esp_zb_window_covering_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_PUMP_CONFIG_CONTROL:
-    case ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT:
-      if(attr_id == ESP_ZB_ZCL_ATTR_THERMOSTAT_THERMOSTAT_RUNNING_STATE_ID) // делаем reportable
-        return esp_zb_cluster_add_attr(attr_list, cluster_id, attr_id, ESP_ZB_ZCL_ATTR_TYPE_16BITMAP, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY | ESP_ZB_ZCL_ATTR_ACCESS_REPORTING, value_p);
-      else
+  if (attr_type == 0 || attr_access == 0) {
+    switch(cluster_id) {
+      case ESP_ZB_ZCL_CLUSTER_ID_BASIC:
+        //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_BASIC");
+        return esp_zb_basic_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG:
+        return esp_zb_power_config_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_DEVICE_TEMP_CONFIG:
+      case ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY:
+        //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY");
+        return esp_zb_identify_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_GROUPS:
+        return esp_zb_groups_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_SCENES:
+        return esp_zb_scenes_cluster_add_attr(attr_list, attr_id, value_p);
+  #ifdef USE_ON_OFF_CLUSTER
+      case ESP_ZB_ZCL_CLUSTER_ID_ON_OFF:
+        //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_ON_OFF");
+        return esp_zb_on_off_cluster_add_attr(attr_list, attr_id, value_p);
+  #endif // USE_ON_OFF_CLUSTER
+      case ESP_ZB_ZCL_CLUSTER_ID_ON_OFF_SWITCH_CONFIG:
+        return esp_zb_on_off_switch_config_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_LEVEL_CONTROL:
+        return esp_zb_level_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_ALARMS:
+      case ESP_ZB_ZCL_CLUSTER_ID_TIME:
+        return esp_zb_time_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_RSSI_LOCATION:
+      case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT:
+        return esp_zb_analog_input_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT:
+        return esp_zb_analog_output_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_ANALOG_VALUE:
+        return esp_zb_analog_value_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_BINARY_INPUT:
+        return esp_zb_binary_input_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_BINARY_OUTPUT:
+  //    ESP_ZB_ZCL_CLUSTER_ID_BINARY_VALUE:
+  //    ESP_ZB_ZCL_CLUSTER_ID_MULTI_INPUT:
+  //    ESP_ZB_ZCL_CLUSTER_ID_MULTI_OUTPUT:
+      case ESP_ZB_ZCL_CLUSTER_ID_MULTI_VALUE:
+        return esp_zb_multistate_value_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_COMMISSIONING:
+      case ESP_ZB_ZCL_CLUSTER_ID_OTA_UPGRADE:
+        return esp_zb_ota_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_POLL_CONTROL:
+  //    ESP_ZB_ZCL_CLUSTER_ID_GREEN_POWER:    
+  //    ESP_ZB_ZCL_CLUSTER_ID_KEEP_ALIVE:    
+      case ESP_ZB_ZCL_CLUSTER_ID_SHADE_CONFIG:
+        return esp_zb_shade_config_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_DOOR_LOCK:
+        return esp_zb_door_lock_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_WINDOW_COVERING:
+        return esp_zb_window_covering_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_PUMP_CONFIG_CONTROL:
+      case ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT:
         return esp_zb_thermostat_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_FAN_CONTROL:
-      return esp_zb_fan_control_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_DEHUMID_CONTROL:     
-    case ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT_UI_CONFIG:
-      return esp_zb_thermostat_ui_config_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_COLOR_CONTROL:
-      return esp_zb_color_control_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_BALLAST_CONFIG:
-    case ESP_ZB_ZCL_CLUSTER_ID_ILLUMINANCE_MEASUREMENT:
-      return esp_zb_illuminance_meas_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT:
-      //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT");
-      return esp_zb_temperature_meas_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT:
-      return esp_zb_pressure_meas_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT:
-      return esp_zb_humidity_meas_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_OCCUPANCY_SENSING:
-      return esp_zb_occupancy_sensing_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE_MEASUREMENT:
-      return esp_zb_carbon_dioxide_measurement_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_PM2_5_MEASUREMENT:
-      return esp_zb_pm2_5_measurement_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_IAS_ZONE:
-      return esp_zb_ias_zone_cluster_add_attr(attr_list, attr_id, value_p);
-    case ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT:
-      return esp_zb_electrical_meas_cluster_add_attr(attr_list, attr_id, value_p);
-//    ESP_ZB_ZCL_CLUSTER_ID_METERING:
+      case ESP_ZB_ZCL_CLUSTER_ID_FAN_CONTROL:
+        return esp_zb_fan_control_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_DEHUMID_CONTROL:     
+      case ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT_UI_CONFIG:
+        return esp_zb_thermostat_ui_config_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_COLOR_CONTROL:
+        return esp_zb_color_control_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_BALLAST_CONFIG:
+      case ESP_ZB_ZCL_CLUSTER_ID_ILLUMINANCE_MEASUREMENT:
+        return esp_zb_illuminance_meas_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT:
+        //ESP_LOGI(TAG, "zbesp_cluster_add_attr ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT");
+        return esp_zb_temperature_meas_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT:
+        return esp_zb_pressure_meas_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT:
+        return esp_zb_humidity_meas_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_OCCUPANCY_SENSING:
+        return esp_zb_occupancy_sensing_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE_MEASUREMENT:
+        return esp_zb_carbon_dioxide_measurement_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_PM2_5_MEASUREMENT:
+        return esp_zb_pm2_5_measurement_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_IAS_ZONE:
+        return esp_zb_ias_zone_cluster_add_attr(attr_list, attr_id, value_p);
+      case ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT:
+        return esp_zb_electrical_meas_cluster_add_attr(attr_list, attr_id, value_p);
+  //    ESP_ZB_ZCL_CLUSTER_ID_METERING:
+    }
   }
-  return ESP_OK; //?
+  else
+    return esp_zb_cluster_add_attr(attr_list, cluster_id, attr_id, attr_type, attr_access, value_p);
 }
 
 /*
@@ -556,8 +563,32 @@ void eraseIfModified(void)
       nvs_close(nvs_handle);
 }
 */
+
+esp_zb_zcl_attr_t *findZclAttr(esp_zb_attribute_list_t *attr_list, uint16_t attrId)
+{
+  struct esp_zb_attribute_list_s *cur = attr_list->next;
+
+  while(cur) {
+    if (cur->attribute.id == attrId) return &(cur->attribute);
+    cur = cur->next;
+  }
+  return NULL;
+}
+
+esp_err_t esp_zb_ep_list_add_ep_(esp_zb_ep_list_t *ep_list, esp_zb_cluster_list_t *cluster_list, uint8_t endpoint, uint16_t app_profile_id, uint16_t app_device_id)
+{
+    esp_zb_endpoint_config_t endpoint_config;
+
+    endpoint_config.endpoint = endpoint;
+    endpoint_config.app_profile_id = app_profile_id;
+    endpoint_config.app_device_id = app_device_id;
+    endpoint_config.app_device_version = 1;
+    return esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config);
+}
+
 static esp_zb_ep_list_t *create_ep_list()
 {
+    //ESP_LOGI(TAG, "create_ep_list()");
     esp_zb_ep_list_t *ep_list = esp_zb_ep_list_create();
 
     //crc16_init(&attr_crc);
@@ -584,32 +615,29 @@ static esp_zb_ep_list_t *create_ep_list()
         //ESP_LOGI(TAG, "getAttributeCount=%d", cluster->getAttributeCount());
         for(int iAttribute=0; iAttribute < cluster->getAttributeCount(); iAttribute++) {
           ZbAttribute *attr = cluster->getAttribute(iAttribute);
-          //ESP_LOGI(TAG, "zbesp_cluster_add_attr(, %d, %d, )", cluster->getId(), attr->getId());
-          if (attr->isCustom()) 
+          if (attr->isCustom()) {
             esp_zb_custom_cluster_add_custom_attr(attr_list, attr->getId(), attr->getType(), attr->getAccess(), attr->getData());
-              //esp_zb_attribute_list_t *attr_list, uint16_t attr_id, uint8_t attr_type, uint8_t attr_access, void *value_p);
-          else
-            zbesp_cluster_add_attr(attr_list, cluster->getId(), attr->getId(), attr->getData());
+          }
+          else {
+            zbesp_cluster_add_attr(attr_list, cluster->getId(), attr->getId(), attr->getType(), attr->getAccess(), attr->getData());
+            esp_zb_zcl_attr_t *zclAttr = findZclAttr(attr_list, attr->getId());
+            if (zclAttr) { 
+              attr->setType(zclAttr->type);
+              attr->setAccess(zclAttr->access);
+            }
+          }
         }
         zbesp_cluster_list_add_cluster(cluster_list, cluster->getId(), attr_list, cluster->getRole());
-        //ESP_LOGI(TAG, "zbesp_cluster_list_add_cluster()");
       }
-      //esp_zb_ep_list_add_ep(ep_list, cluster_list, ep->getId(), ep->getProfileId(), ep->getDeviceId());
-      esp_zb_endpoint_config_t endpoint_config;
-      endpoint_config.endpoint = ep->getId();
-      endpoint_config.app_profile_id = ep->getProfileId();
-      endpoint_config.app_device_id = ep->getDeviceId();
-      endpoint_config.app_device_version = 1;
-      ESP_ERROR_CHECK(esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config));
-      //ESP_LOGI(TAG, "esp_zb_ep_list_add_ep()");
+      ESP_ERROR_CHECK(esp_zb_ep_list_add_ep_(ep_list, cluster_list, ep->getId(), ep->getProfileId(), ep->getDeviceId()));
     }
     return ep_list;
 }
 
-extern "C" void esp_zb_task(void *pvParameters)
+static void esp_zb_task(void *pvParameters)
 {
     //ESP_LOGI(TAG, "esp_zb_task()");
-    uint16_t undefined_value = 0x8000;
+    //uint16_t undefined_value = 0x8000;
 
     assert(g_device);
     esp_zb_cfg_t zigbee_config;
@@ -621,6 +649,7 @@ extern "C" void esp_zb_task(void *pvParameters)
     
     esp_zb_ep_list_t *ep_list = create_ep_list();
     esp_zb_device_register(ep_list);
+    g_device->setRegistered(true);
     //dumpEndpointList(ep_list);
     esp_zb_core_action_handler_register(zb_core_action_handler);
     esp_zb_set_primary_network_channel_set(g_device->getChannelMask()); // AFTER esp_zb_init, BEFORE esp_zb_start
@@ -629,10 +658,11 @@ extern "C" void esp_zb_task(void *pvParameters)
     //esp_zb_nvram_erase_at_start(true);
 
   //  eraseIfModified();
-    ESP_ERROR_CHECK(esp_zb_start(false)); 
-      // NVRAM и конфигурация продукта будут загружены после вызова esp_zb_start()
-      // autostart=true - после завершения запуска вызывается esp_zb_app_signal_handler. Пользователь может использовать esp_zb_bdb_start_top_level_commissioning для изменения режима BDB.
-      // esp_zb_start с режимом autostart=false используется, когда приложение хочет что-то сделать перед подключением к сети.
+    ESP_ERROR_CHECK(esp_zb_start(false));
+    // NVRAM и конфигурация продукта будут загружены после вызова esp_zb_start()
+    // autostart=true - после завершения запуска вызывается esp_zb_app_signal_handler. Пользователь может использовать esp_zb_bdb_start_top_level_commissioning для изменения режима BDB.
+    // esp_zb_start с режимом autostart=false используется, когда приложение хочет что-то сделать перед подключением к сети.
+    g_device->setStarted(true);
 
     esp_zb_main_loop_iteration();
 }
@@ -668,13 +698,13 @@ uint8_t EspZbRuntime::setAttributeValue(uint8_t endpoint, uint16_t clusterId, ui
   return esp_zb_zcl_set_attribute_val(endpoint, clusterId, clusterRole, attrId, value, check);
 }
 
-extern "C" void leaveNetworkCB(esp_zb_zdp_status_t zdo_status, void *user_ctx)
-{
-  ESP_LOGI(TAG, "*************** leaveNetworkCB zdo_status=%02x", zdo_status);
+//void leaveNetworkCB(esp_zb_zdp_status_t zdo_status, void *user_ctx)
+//{
+//  ESP_LOGI(TAG, "*************** leaveNetworkCB zdo_status=%02x", zdo_status);
   //esp_zb_factory_reset(); // После сброса само приложение получит сигнал ссылки на ZB_ZDO_SIGNAL_LEAVE. После сброса настроек будет выполнен сброс системы
 
   // esp_zb_zcl_reset_all_endpoints_to_factory_default();
-}
+//}
 
 // https://github.com/zigpy/zigpy/issues/831?ysclid=lu5vinxlfu163749576
 // https://developer.nordicsemi.com/nRF_Connect_SDK/doc/zboss/3.11.2.0/using_zigbee__z_c_l.html
@@ -683,6 +713,7 @@ void EspZbRuntime::leave(void)
   ESP_LOGI(TAG, "EspZbRuntime::factoryReset()");
   //esp_zb_nvram_erase_at_start(true);
   esp_zb_factory_reset(); // После сброса само приложение получит сигнал ссылки на ZB_ZDO_SIGNAL_LEAVE. После сброса настроек будет выполнен сброс системы
+
 /*
   esp_zb_zdo_mgmt_leave_req_param_t req;
   //esp_zb_ieee_address_by_short(0, req.device_address);
@@ -737,5 +768,5 @@ void EspZbRuntime::start(void)
 
   ESP_ERROR_CHECK(esp_zb_platform_config(&platform_config));
 
-  xTaskCreate(esp_zb_task, "Zigbee_main", 5096, NULL, 5, NULL);
+  xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 5, NULL);
 }

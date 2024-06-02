@@ -1,6 +1,12 @@
 #ifndef __ZBESP_RUNTIME_H__
 #define __ZBESP_RUNTIME_H__
 
+#ifndef ZIGBEE_MODE_ED
+#ifndef ZIGBEE_MODE_ZCZR
+#error "Zigbee end device (ED) or coordinator/router (ZCZR) mode is not selected in Tools->Zigbee mode"
+#endif
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include "esp_log.h"

@@ -1,4 +1,4 @@
-//#include <Arduino.h>
+#include <Arduino.h>
 #include "esp_log.h"
 #include "zb_zcl.h"
 #include "zb_device.h"
@@ -41,7 +41,7 @@ void ZbDevice::appendMandatories(void)
           zb_attr_info_t *ai = &ci->attrs[iAttribute];
           if(ai->mandatory && !cluster->findAttribute(ai->attrId)) {
             //ESP_LOGI(TAG, "Append clusterId=%04X, attrId=%04X, attrAccess=%02X", ci->clusterId, ai->attrId, ai->attrAccess);
-            ZbAttribute *attr = new ZbAttribute(*cluster, ai->attrId, ai->attrType, ai->attrAccess, ai->defaultValue);
+            ZbAttribute *attr = new ZbAttribute(*cluster, ai->attrId, ai->attrType, ai->attrAccess, ai->defaultValue, getAttrTypeLength(ai->attrType));
           }
         }
       } 
@@ -85,8 +85,7 @@ void ZbAttribute::report(void)
 void ZbAttribute::updateValue(void)
 {
   //ESP_LOGI(TAG, "ZbAttribute::updateValue(void)");
-  // !!! писать в атрибут не только при соединении, а в любом случае после создания атрибутов через SDK
-  if(getDevice()->joined()) {  
+  if(getDevice()->registered()) {  
     assert(g_runtime);
     ESP_LOGI(TAG, "g_runtime->setAttributeValue endpoint=%d clusterId=0x%04X attrId=0x%04X: 0x%02X", getEndpoint()->getId(), getCluster()->getId(), m_id, *m_data);
     esp_zb_zcl_status_t err = (esp_zb_zcl_status_t) g_runtime->setAttributeValue(getEndpoint()->getId(), getCluster()->getId(), getCluster()->getRole(), m_id, m_data, false);
@@ -97,6 +96,25 @@ void ZbAttribute::updateValue(void)
   }
 }
 
+void ZbAttribute::setData(void *data, uint16_t dataLen) {
+  if (m_data && m_dataOwned) free(m_data);
+  if(!data) {
+    m_data = NULL;
+    m_dataOwned = false;
+  }
+  if (dataLen > 0) {
+    m_data = (uint8_t *) malloc(dataLen);
+    memcpy(m_data, data, dataLen);
+    m_dataOwned = true;
+  }
+  else {
+    m_data = (uint8_t *) data;
+    m_dataOwned = false;
+  }
+  updateValue();
+}
+
+/*
 void ZbAttribute::setValue(int32_t value)
 {
 //  ESP_LOGI(TAG, "ZbAttribute::setValue(uint8_t value)");
@@ -126,21 +144,4 @@ void ZbAttribute::setValue(float value)
   m_dataOwned = false;
   updateValue();
 }
-
-void ZbAttribute::setValue(char* value)
-{
-  //ESP_LOGI(TAG, "ZbAttribute::setValue(char* value)");
-  if (m_data && m_dataOwned) free(m_data);
-  if(m_type == ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING || m_type == ESP_ZB_ZCL_ATTR_TYPE_OCTET_STRING) { // дополнить!!!
-    int len = strlen(value);
-    m_data = (uint8_t *) malloc(len + 1);
-    m_data[0] = len;
-    memcpy(m_data + 1, value, len);
-    m_dataOwned = true;
-  }
-  else {
-    m_data = (uint8_t *) value;
-    m_dataOwned = false;
-  }
-  updateValue();
-}
+*/

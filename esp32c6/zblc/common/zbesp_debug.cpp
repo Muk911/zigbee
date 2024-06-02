@@ -1,5 +1,6 @@
-#include "zb_debug.h"
+#include "esp_log.h"
 #include "esp_zigbee_core.h"
+#include "zbesp_debug.h"
 
 #define TAG "zbesp_debug"
 
@@ -57,8 +58,8 @@ char *get_core_action_callback_name(esp_zb_core_action_callback_id_t callback_id
       return "Read report configuration response";
     case ESP_ZB_CORE_CMD_DISC_ATTR_RESP_CB_ID:
       return "Discover attributes response";
-//    case ESP_ZB_CORE_CMD_DEFAULT_RESP_CB_ID:
-//      return "Default response";
+    case ESP_ZB_CORE_CMD_DEFAULT_RESP_CB_ID:
+      return "Default response";
     case ESP_ZB_CORE_CMD_OPERATE_GROUP_RESP_CB_ID:
       return "Group add group response";
     case ESP_ZB_CORE_CMD_VIEW_GROUP_RESP_CB_ID:
@@ -94,8 +95,9 @@ char *get_core_action_callback_name(esp_zb_core_action_callback_id_t callback_id
   }
 }
 
-void dumpAttrList(esp_zb_attribute_list_t *attr_list)
+void dumpZclAttrList(esp_zb_attribute_list_t *attr_list)
 {
+  //ESP_LOGI(TAG, " dumpZclAttrList:");
   struct esp_zb_attribute_list_s *cur = attr_list;
 
   while(cur) {

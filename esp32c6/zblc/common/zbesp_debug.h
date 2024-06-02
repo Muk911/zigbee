@@ -5,7 +5,7 @@
 
 char *get_core_action_callback_name(esp_zb_core_action_callback_id_s callback_id);
 
-void dumpAttrList(esp_zb_attribute_list_t *attr_list);
+void dumpZclAttrList(esp_zb_attribute_list_t *attr_list);
 void dumpZclAttribute(esp_zb_zcl_attr_t *attr);
 void dumpZclCluster(esp_zb_zcl_cluster_t *cluster);
 void dumpZclEndpoint(esp_zb_endpoint_t *endpoint);
