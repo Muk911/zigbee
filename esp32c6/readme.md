@@ -60,6 +60,7 @@
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://github.com/ginkage/CeilingCW-C6
 - https://gitlab.com/kasraghu/p1-esp32c6
+- https://github.com/GainSec/M5NanoC6-Zigbee-Sniffer
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/luar123/esphome_zb_sensor
 - https://github.com/wokwi/esp32c6-i2c-lp
