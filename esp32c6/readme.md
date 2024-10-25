@@ -53,6 +53,7 @@
 - https://github.com/Live-Control-Project/MEEF
 - https://github.com/xmow49/ESP32H2-Zigbee-Demo
 - https://github.com/xmow49/ESP32H2-SmokeDetector
+- https://github.com/barsik21/esp32h2-thermo
 - https://github.com/username-AL/ESP32H2-Zigbee
 - https://github.com/username-AL/ESP32H2-SmokeDetector
 - https://github.com/DmytroML/ESP36C6_Zigbee_PZEM-004t
@@ -64,6 +65,7 @@
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/luar123/esphome_zb_sensor
 - https://github.com/wokwi/esp32c6-i2c-lp
+- https://github.com/espressif/arduino-esp32/tree/master/libraries/Zigbee
 - https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
 - https://github.com/mozolin/esp32c6_zigbee
 - https://github.com/m5stack/M5NanoC6/tree/main/examples (примеры для C6 без использования Zigbee)
