@@ -45,6 +45,7 @@
 - https://github.com/espressif/esp-idf/tree/master/examples/zigbee
 - https://github.com/espressif/esp-zigbee-sdk/tree/main/examples
 - https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/Zigbee
+- https://github.com/espressif/arduino-esp32/tree/master/libraries/Zigbee
 - https://github.com/u236/esp32c6-light-example
 - https://github.com/u236/esp-zb-vindriktning
 - https://github.com/lmahmutov/esp32_c6_co2_sensor
