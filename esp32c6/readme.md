@@ -62,13 +62,25 @@
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://github.com/ginkage/CeilingCW-C6
 - https://gitlab.com/kasraghu/p1-esp32c6
+- https://github.com/rpavlyuk/ESPPressureSensor
 - https://github.com/GainSec/M5NanoC6-Zigbee-Sniffer
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/luar123/esphome_zb_sensor
 - https://github.com/wokwi/esp32c6-i2c-lp
-- https://github.com/espressif/arduino-esp32/tree/master/libraries/Zigbee
+- https://github.com/mundevx/Light_Dim_Color_Fan
 - https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
 - https://github.com/mozolin/esp32c6_zigbee
 - https://github.com/m5stack/M5NanoC6/tree/main/examples (примеры для C6 без использования Zigbee)
 - https://github.com/nlimper/Mini-AP-v3
 - https://github.com/nlimper/Mini-AP-v4
+- https://github.com/prairiesnpr/esp_zha_freezer_mon
+- https://github.com/diogocardoso28/MotorradCan2Zigbee
+- https://github.com/DmytroML/ESP36H2_Zigbee_PZEM-003
+- https://github.com/DmytroML/ESP36C6_Zigbee_PZEM-004t
+- https://github.com/jorritohm/ESP32-C6_ZigBee_Sensor-and-Display
+- https://github.com/scipioni/beesensor
+- https://github.com/prairiesnpr/esp_zha_test_bench
+- https://github.com/tlanglois1111/zigbee_aht20
+- https://github.com/markot99/airbee
+- https://github.com/GavriKos/ZigBee-irrigation-automation
+- 
