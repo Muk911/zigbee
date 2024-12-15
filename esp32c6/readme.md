@@ -10,6 +10,8 @@
 Шаги по установке и настройке Expressif IDF описаны в статьях:
 - https://www.waveshare.com/wiki/ESP32-C6-DEV-KIT-N8
 - https://www.waveshare.com/wiki/ESP32-H2-DEV-KIT-N4
+- https://wiki.seeedstudio.com/xiao_esp32c6_zigbee/
+- https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
 
 Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. Ниже описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2.
 
@@ -83,4 +85,4 @@
 - https://github.com/tlanglois1111/zigbee_aht20
 - https://github.com/markot99/airbee
 - https://github.com/GavriKos/ZigBee-irrigation-automation
-- 
+- https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
