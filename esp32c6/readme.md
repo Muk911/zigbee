@@ -12,6 +12,7 @@
 - https://www.waveshare.com/wiki/ESP32-H2-DEV-KIT-N4
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee/
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
+- https://community.home-assistant.io/t/help-with-esp32-h2-zigbee/766216/9
 
 Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. Ниже описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2.
 
@@ -86,3 +87,4 @@
 - https://github.com/markot99/airbee
 - https://github.com/GavriKos/ZigBee-irrigation-automation
 - https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
+- https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
