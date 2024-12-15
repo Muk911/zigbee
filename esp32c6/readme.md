@@ -88,3 +88,5 @@
 - https://github.com/GavriKos/ZigBee-irrigation-automation
 - https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
+- https://github.com/volkerp/ESP32C6_Zigbee_Example
+- https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
