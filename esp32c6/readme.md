@@ -90,3 +90,14 @@
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
 - https://github.com/volkerp/ESP32C6_Zigbee_Example
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
+- https://github.com/sigmdel/xiao_esp32c6_sketches
+- https://github.com/ElectronicCats/Minino
+- https://github.com/BegoonLab/xiao-esp32c6-wifi-sensor
+- https://github.com/Szybet/Yatchy
+- https://github.com/Tropaion/ZigBee_SmartMeter_Reader
+- https://github.com/xyzroe/ZigUSB_C6
+- https://github.com/greatcattw/ESP32_C6_matter_example_bin_C3_c2
+- https://github.com/tianrking/arduino-cli-esp32
+- https://github.com/dj1ch/esp32c6-sniffer
+- https://github.com/sl45sms/esp32c6-Keyword-Spotting
+- 
