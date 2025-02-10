@@ -100,4 +100,4 @@
 - https://github.com/tianrking/arduino-cli-esp32
 - https://github.com/dj1ch/esp32c6-sniffer
 - https://github.com/sl45sms/esp32c6-Keyword-Spotting
-- 
+- https://github.com/eugene-polyakov/zigbee-plant-waterer
