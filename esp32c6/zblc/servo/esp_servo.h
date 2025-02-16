@@ -2,6 +2,7 @@
 #define __ESP_SERVO_H__
 
 #include <Arduino.h>
+#include <esp32-hal-periman.h>
 #include "esp_log.h"
 
 #define TAG "esp_servo"
@@ -9,7 +10,6 @@
 class EspServo {
 public:
   EspServo() {
-    
   }
 
   void attach(uint8_t pin, uint16_t min, uint16_t max)
@@ -20,6 +20,11 @@ public:
     pinMode(pin, OUTPUT);            // Setting the signal output pin
     ledcAttach(pin, 50, 16);
     //delay(20); //some ESCs need a initial stop signal to connect
+  }
+
+  bool attached()
+  {
+    return perimanGetPinBus(m_pin, ESP32_BUS_TYPE_LEDC) != 0;
   }
 
   void detach(void)
@@ -34,12 +39,9 @@ public:
 
   void write(uint16_t position)
   {  
-    //uint16_t dutyCycle;    // Duty Cycle of the pwm signal generated
-
     position = constrain(position, m_min, m_max);
-    //dutyCycle = map(position, m_min, m_max, 500, 2500);  // Dutycycle to generate a pwm signal with that width in microseconds(us)
+    ESP_LOGI(TAG, "ledcWrite=%d", position);
     ledcWrite(m_pin, position);                         // generating a PWM with the proper width in us
-    // ledcFade(uint8_t pin, uint32_t start_duty, uint32_t target_duty, int max_fade_time_ms){
   }
 
 private:
@@ -83,12 +85,12 @@ public:
     m_min = value;
   }
 
-  uint8_t getMax()
+  uint16_t getMax()
   {
     return m_max;
   }
 
-  void setMax(uint8_t value)
+  void setMax(uint16_t value)
   {
     m_max = value;
   }
