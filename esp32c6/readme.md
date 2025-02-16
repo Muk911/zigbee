@@ -81,3 +81,5 @@
 - https://github.com/dj1ch/esp32c6-sniffer
 - https://github.com/sl45sms/esp32c6-Keyword-Spotting
 - https://github.com/eugene-polyakov/zigbee-plant-waterer
+- https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
+- 
