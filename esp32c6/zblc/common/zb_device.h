@@ -17,7 +17,7 @@
 #define DEVICE_TYPE_COORDINATOR  1
 #define DEVICE_TYPE_ROUTER       2
 #define DEVICE_TYPE_ENDPOINT     3
-
+/*
 enum zb_zcl_on_off_attr_e {
   ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID = 0, 
   ZB_ZCL_ATTR_ON_OFF_GLOBAL_SCENE_CONTROL = 0x4000, 
@@ -25,7 +25,7 @@ enum zb_zcl_on_off_attr_e {
   ZB_ZCL_ATTR_ON_OFF_OFF_WAIT_TIME = 0x4002,
   ZB_ZCL_ATTR_ON_OFF_START_UP_ON_OFF = 0x4003
 };
-
+*/
 class ZbEndpoint;
 class ZbCluster;
 class ZbAttribute;

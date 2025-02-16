@@ -59,7 +59,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
     case ESP_ZB_BDB_SIGNAL_DEVICE_FIRST_START:
     case ESP_ZB_BDB_SIGNAL_DEVICE_REBOOT:
         if (err_status == ESP_OK) {
-            ESP_LOGI(TAG, ">");
+            //ESP_LOGI(TAG, ">");
             if(g_device->p_deferredInitCB) 
                 ESP_LOGI(TAG, "Deferred initialization %s", g_device->p_deferredInitCB() ? "failed." : "successful.");
             ESP_LOGI(TAG, "Device started up in %sfactory-reset mode", esp_zb_bdb_is_factory_new() ? "" : "NON ");
@@ -327,17 +327,17 @@ static esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t callbac
 {
     esp_err_t ret = ESP_OK;
 
-    ESP_LOGI(TAG, "Receive Zigbee action (0x%x - %s) callback", callback_id, get_core_action_callback_name(callback_id));
+    //ESP_LOGI(TAG, "Receive Zigbee action (0x%x - %s) callback", callback_id, get_core_action_callback_name(callback_id));
     switch (callback_id) {
     //case ESP_ZB_CORE_REPORT_ATTR_CB_ID:  // Attribute Report - для серверных кластеров?
         //ret = zb_attribute_reporting_handler((esp_zb_zcl_report_attr_message_t *)message);
         //break;
     case ESP_ZB_CORE_SET_ATTR_VALUE_CB_ID: // Set attribute value
-        ESP_LOGI(TAG, "ESP_ZB_CORE_SET_ATTR_VALUE_CB_ID");
+        //ESP_LOGI(TAG, "ESP_ZB_CORE_SET_ATTR_VALUE_CB_ID");
         ret = zb_set_attr_value_handler((esp_zb_zcl_set_attr_value_message_t *)message);
         break;
     case ESP_ZB_CORE_CMD_READ_ATTR_RESP_CB_ID: // Read attribute response
-        ESP_LOGI(TAG, "ESP_ZB_CORE_CMD_READ_ATTR_RESP_CB_ID");
+        //ESP_LOGI(TAG, "ESP_ZB_CORE_CMD_READ_ATTR_RESP_CB_ID");
         ret = zb_read_attr_resp_handler((esp_zb_zcl_cmd_read_attr_resp_message_t *) message);
         break;
     //case ESP_ZB_CORE_CMD_REPORT_CONFIG_RESP_CB_ID: // Configure report response
@@ -695,7 +695,10 @@ uint8_t EspZbRuntime::setAttributeValue(uint8_t endpoint, uint16_t clusterId, ui
 {
   //ESP_LOGI(TAG, "EspZbRuntime::setAttributeValueFunc");
 //  ESP_LOGI(TAG, "esp_zb_zcl_set_attribute_val endpoint=%d clusterId=%02X attrId=%02X value=%d", endpoint, clusterId, attrId, *(uint8_t *)value);
-  return esp_zb_zcl_set_attribute_val(endpoint, clusterId, clusterRole, attrId, value, check);
+  esp_zb_lock_acquire(portMAX_DELAY);
+  esp_zb_zcl_status_t ret = esp_zb_zcl_set_attribute_val(endpoint, clusterId, clusterRole, attrId, value, check);
+  esp_zb_lock_release();
+  return ret; 
 }
 
 //void leaveNetworkCB(esp_zb_zdp_status_t zdo_status, void *user_ctx)
@@ -710,10 +713,11 @@ uint8_t EspZbRuntime::setAttributeValue(uint8_t endpoint, uint16_t clusterId, ui
 // https://developer.nordicsemi.com/nRF_Connect_SDK/doc/zboss/3.11.2.0/using_zigbee__z_c_l.html
 void EspZbRuntime::leave(void)
 {
-  ESP_LOGI(TAG, "EspZbRuntime::factoryReset()");
+  ESP_LOGI(TAG, "EspZbRuntime::leave()");
+  esp_zb_lock_acquire(portMAX_DELAY);
   //esp_zb_nvram_erase_at_start(true);
   esp_zb_factory_reset(); // После сброса само приложение получит сигнал ссылки на ZB_ZDO_SIGNAL_LEAVE. После сброса настроек будет выполнен сброс системы
-
+  esp_zb_lock_release();
 /*
   esp_zb_zdo_mgmt_leave_req_param_t req;
   //esp_zb_ieee_address_by_short(0, req.device_address);
@@ -735,11 +739,15 @@ esp_err_t zbesp_report_attribute(uint8_t endpoint, uint16_t clusterId, uint16_t 
     cmd.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
     cmd.clusterID = clusterId;
     cmd.attributeID = attributeId;
-    cmd.cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE;
-    esp_zb_zcl_attr_t *value_r = esp_zb_zcl_get_attribute(endpoint, clusterId, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, attributeId);
+  //  cmd.cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE;
+
+    esp_zb_lock_acquire(portMAX_DELAY);
+    esp_zb_zcl_attr_t *value_r = esp_zb_zcl_get_attribute(endpoint, clusterId, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, attributeId); // нужен ли?
 //    memcpy(value_r->data_p, value, value_length);
-    ESP_LOGI(TAG, "zbesp_report_attribute: %d", *(uint8_t *) value_r->data_p);
-    return esp_zb_zcl_report_attr_cmd_req(&cmd);
+//    ESP_LOGI(TAG, "zbesp_report_attribute: %d", *(uint8_t *) value_r->data_p);
+    esp_err_t ret = esp_zb_zcl_report_attr_cmd_req(&cmd);
+    esp_zb_lock_release();
+    return ret;
 }
 
 uint8_t EspZbRuntime::reportAttribute(uint8_t endpoint, uint16_t clusterId, uint16_t attributeId)
@@ -768,5 +776,5 @@ void EspZbRuntime::start(void)
 
   ESP_ERROR_CHECK(esp_zb_platform_config(&platform_config));
 
-  xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 5, NULL);
+  xTaskCreate(esp_zb_task, "zigbee_main", 4096, NULL, 5, NULL);
 }
