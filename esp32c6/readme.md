@@ -25,10 +25,12 @@
 3. Следует напомнить, что для получения данных с сенсоров необходимо настроить режим репортинга. Некоторые системы Умного дома обеспечивают настройку репортинга по умолчанию. Если данные сенсоров все такие не обновляются, необходимо настроить репортинг самостоятельно.
 
 ### Примеры кода ###
+- https://github.com/acha666/esp32-h2-air-sensor
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
 - https://github.com/barsik21/esp32h2-thermo
 - https://github.com/BegoonLab/xiao-esp32c6-wifi-sensor
+- https://github.com/ChadiEM/zigbee-bed-occupancy
 - https://github.com/dagroe/zigbee-rotary-dimmer-switch
 - https://github.com/diogocardoso28/MotorradCan2Zigbee
 - https://github.com/dj1ch/esp32c6-sniffer
@@ -40,11 +42,14 @@
 - https://github.com/espressif/esp-idf/tree/master/examples/zigbee
 - https://github.com/espressif/esp-zigbee-sdk/tree/main/examples
 - https://github.com/eugene-polyakov/zigbee-plant-waterer
+- https://github.com/Forairaaaaa/arduino_lite
 - https://github.com/GainSec/M5NanoC6-Zigbee-Sniffer
+- https://github.com/GammaTroniques/TICMeter
 - https://github.com/GavriKos/ZigBee-irrigation-automation
 - https://github.com/ginkage/CeilingCW-C6
 - https://github.com/greatcattw/ESP32_C6_matter_example_bin_C3_c2
 - https://github.com/jorritohm/ESP32-C6_ZigBee_Sensor-and-Display
+- https://github.com/ksushaizplusha/esp_vindkring
 - https://github.com/kylemwagner83/esp32c6-bme280-zigbee
 - https://github.com/Live-Control-Project/MEEF
 - https://github.com/lmahmutov/esp32_c6_co2_sensor
@@ -56,6 +61,7 @@
 - https://github.com/nlimper/Mini-AP-v3
 - https://github.com/nlimper/Mini-AP-v4
 - https://github.com/nomis/candle-dribbler
+- https://github.com/p3likan0/ESP32-h2-BME280-Zigbee
 - https://github.com/prairiesnpr/esp_zha_freezer_mon
 - https://github.com/prairiesnpr/esp_zha_test_bench
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
@@ -74,6 +80,7 @@
 - https://github.com/username-AL/ESP32H2-Zigbee
 - https://github.com/vedatbotuk/selforganized_802.15.4_network_with_esp32
 - https://github.com/volkerp/ESP32C6_Zigbee_Example
+- https://github.com/waelkh9/Zigbee_BME680_BHT1750
 - https://github.com/wokwi/esp32c6-i2c-lp
 - https://github.com/xmow49/ESP32H2-SmokeDetector
 - https://github.com/xmow49/ESP32H2-Zigbee-Demo
