@@ -1,9 +1,9 @@
 # Разработка Zigbee устройств на ESP32-C6/H2 в среде Arduino IDE
 
 ## Установка Arduino IDE и расширения для ESP32-C6/H2 ###
-1. Скачайте и установите актуальную версию Arduino IDE. На момент написания этого текста последней версией была версия 2.2.1.
+1. Скачайте и установите актуальную версию Arduino IDE. На момент написания этого текста последней версией была версия 2.3.4.
 2. В диалоге настроек **Preferences** в разделе **Additional boards manager URLs** укажите ссылку для Arduino-ESP32 (ссылка для DEV-версии: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json).
-3. Вызовите менеджер плат Boards Manager. В поиске наберите "esp32" и найдите библиотеку плат "esp32 by Expressif Systems". На момент написания этого текста последней версией была версия 3.0.0-alpha3. Установите библиотеку плат.
+3. Вызовите менеджер плат Boards Manager. В поиске наберите "esp32" и найдите библиотеку плат "esp32 by Expressif Systems". На момент написания этого текста последней версией была версия 3.1.2. Установите библиотеку плат.
 4. В меню Tools выберите подходящий модуль, например Board > esp32 > **ESP32C6 Dev Module**.
 5. В меню Tools выберите Partition Scheme = "Zigbee 4MB with spiffs".
 6. В меню Tools выберите Zigbee Mode = "Zigbee ED (end device)" или "Zigbee ZCZR (coordinatior/router)" в зависимости от того, хотите Вы реализовать End Device или Router.
