@@ -14,7 +14,7 @@
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
 - https://community.home-assistant.io/t/help-with-esp32-h2-zigbee/766216/9
 
-Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. Ниже описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2.
+Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. В [статье](arduino-esp32.md) описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2.
 
 Еще одной альтернативой является использование Expressif IDF и подключение библиотек Arduino как компонентов IDF.
 
