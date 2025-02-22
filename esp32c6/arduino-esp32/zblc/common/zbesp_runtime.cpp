@@ -323,6 +323,30 @@ static esp_err_t zb_configure_report_resp_handler(const esp_zb_zcl_cmd_config_re
 }
 */
 
+static esp_err_t esp_zb_door_lock_cmd_handler(const esp_zb_zcl_door_lock_lock_door_message_t *message) 
+{ 
+    ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message"); 
+    ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)", message->info.status); 
+    //ESP_LOGI(TAG, "Received message: endpoint(%d), cluster(0x%x)", message->info.dst_endpoint, message->info.cluster); 
+
+    ZbEndpoint *ep = g_device->findEndpoint(message->info.dst_endpoint);
+    if(!ep) {
+      ESP_LOGI(TAG, "Endpoint %d not found.", message->info.dst_endpoint);
+      return ESP_FAIL;
+    }
+    ZbCluster *cluster = ep->findCluster(message->info.cluster);
+    if(!cluster) {
+      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X not found.", message->info.dst_endpoint, message->info.cluster);
+      return ESP_FAIL;
+    }
+    if(cluster->getId() != ESP_ZB_ZCL_CLUSTER_ID_DOOR_LOCK) {
+      ESP_LOGI(TAG, "Endpoint %d cluster 0x%04X is not Door Lock cluster.", message->info.dst_endpoint, message->info.cluster);
+      return ESP_FAIL;
+    }
+    cluster->commandReceived(message->cmd_id);  //ESP_ZB_ZCL_CMD_DOOR_LOCK_LOCK_DOOR, ...
+    return ESP_OK; 
+}
+
 static esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t callback_id, const void *message)
 {
     esp_err_t ret = ESP_OK;
@@ -346,6 +370,11 @@ static esp_err_t zb_core_action_handler(esp_zb_core_action_callback_id_t callbac
     case ESP_ZB_CORE_CMD_DISC_ATTR_RESP_CB_ID:
         return ESP_ERR_NOT_SUPPORTED;
       //esp_zb_zcl_cmd_discover_attributes_resp_message_t
+    case ESP_ZB_CORE_DOOR_LOCK_LOCK_DOOR_CB_ID:
+        //esp_zb_zcl_door_lock_lock_door_message_t *lock_door_message = (esp_zb_zcl_door_lock_lock_door_message_t *) message;
+        //ESP_LOGI(TAG, "ESP_ZB_CORE_DOOR_LOCK_LOCK_DOOR_CB_ID %d", ((esp_zb_zcl_door_lock_lock_door_message_t *) message)->cmd_id);
+        return esp_zb_door_lock_cmd_handler((esp_zb_zcl_door_lock_lock_door_message_t *) message); 
+        //break;
     case ESP_ZB_CORE_OTA_UPGRADE_VALUE_CB_ID: // Upgrade OTA
         return ota_handler(*(esp_zb_zcl_ota_upgrade_value_message_t*) message);  
     default:

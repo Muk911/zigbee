@@ -33,6 +33,7 @@ class ZbRuntime;
 
 extern ZbRuntime *g_runtime;
 
+typedef void (*CommandReceivedCB)(ZbCluster *zc, uint8_t command);
 typedef void (*AttributeValueChangedCB)(ZbAttribute *za, uint8_t *data);
 typedef uint8_t (*DeferredInitCB)(void);
 typedef void (*DeviceStartedCB)(void);
@@ -273,6 +274,16 @@ public:
 
   ZbAttribute* findAttribute(uint16_t id);
 
+  void commandReceived(uint8_t command)
+  {
+    if(m_commandReceivedCB)
+      m_commandReceivedCB(this, command);
+  }
+
+  void onCommandReceived(CommandReceivedCB commandReceivedCB) {
+    m_commandReceivedCB = commandReceivedCB;
+  }
+
 protected:
   ZbEndpoint *m_endpoint;
 private:
@@ -280,6 +291,7 @@ private:
   uint8_t m_role;
   int m_attrCount;
   ZbAttribute **m_attributes; //MAX_CLUSTER_ATTRIBUTES
+  CommandReceivedCB m_commandReceivedCB;
 };
 
 class ZbAttribute {
@@ -645,6 +657,18 @@ private:
 class ZbThermostatCluster : public ZbCluster {
 public:
   ZbThermostatCluster(ZbEndpoint &endpoint) : ZbCluster(endpoint, ESP_ZB_ZCL_CLUSTER_ID_THERMOSTAT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE) {}
+private:
+};
+
+class ZbDoorLockCluster : public ZbCluster {
+public:
+  ZbDoorLockCluster(ZbEndpoint &endpoint) : ZbCluster(endpoint, ESP_ZB_ZCL_CLUSTER_ID_DOOR_LOCK, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE) {}
+private:
+};
+
+class ZbWindowCoveringCluster : public ZbCluster {
+public:
+  ZbWindowCoveringCluster(ZbEndpoint &endpoint) : ZbCluster(endpoint, ESP_ZB_ZCL_CLUSTER_ID_WINDOW_COVERING, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE) {}
 private:
 };
 
