@@ -1,7 +1,6 @@
 #include "zb_device.h"
 #include "zbesp_runtime.h"
 #include "zb_button.h"
-#include "esp_servo.h"
 #include <esp32-hal-periman.h>
 #include "zcl/esp_zigbee_zcl_door_lock.h"
 
