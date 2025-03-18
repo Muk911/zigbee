@@ -24,9 +24,17 @@
 2. В случае использования в разрабатываемом устройстве стандартных кластеров и атрибутов Zigbee Cluster Library, устройство должно подключаться к тестовому стенду без необходимости написания каких-либо конвертеров.
 3. Следует напомнить, что для получения данных с сенсоров необходимо настроить режим репортинга. Некоторые системы Умного дома обеспечивают настройку репортинга по умолчанию. Если данные сенсоров все такие не обновляются, необходимо настроить репортинг самостоятельно.
 
+### Примеры кода от Expressif ###
+
+- https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/Zigbee
+- https://github.com/espressif/arduino-esp32/tree/master/libraries/Zigbee
+- https://github.com/espressif/esp-idf/tree/master/examples/zigbee
+- https://github.com/espressif/esp-zigbee-sdk/tree/main/examples
+  
 ### Примеры кода ###
 - https://github.com/acha666/esp32-h2-air-sensor
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
+- https://github.com/andryblack/esp-coordinator
 - https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
 - https://github.com/barsik21/esp32h2-thermo
 - https://github.com/BegoonLab/xiao-esp32c6-wifi-sensor
@@ -37,10 +45,6 @@
 - https://github.com/DmytroML/ESP36C6_Zigbee_PZEM-004t
 - https://github.com/DmytroML/ESP36H2_Zigbee_PZEM-003
 - https://github.com/ElectronicCats/Minino
-- https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/Zigbee
-- https://github.com/espressif/arduino-esp32/tree/master/libraries/Zigbee
-- https://github.com/espressif/esp-idf/tree/master/examples/zigbee
-- https://github.com/espressif/esp-zigbee-sdk/tree/main/examples
 - https://github.com/eugene-polyakov/zigbee-plant-waterer
 - https://github.com/Forairaaaaa/arduino_lite
 - https://github.com/GainSec/M5NanoC6-Zigbee-Sniffer
