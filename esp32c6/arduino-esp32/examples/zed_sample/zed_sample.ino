@@ -1,3 +1,4 @@
+#ifndef ZIGBEE_MODE_ED
 #error "Zigbee end device mode is not selected in Tools->Zigbee mode"
 #endif
 
@@ -15,10 +16,10 @@
 static const char *TAG = "zigbee";
 
 #define MANUFACTURER_NAME   "MEA"
-#define MODEL_NAME          "Test1"
+#define MODEL_NAME          "thp.sensor"
 #define ZCL_VERSION         0x03
 #define APP_VERSION         0x01
-#define POWER_SOURCE        0x01
+#define POWER_SOURCE        0x04
 
 #define DEVICE_ENDPOINT     0x01
 #define DEVICE_PROFILE_ID   ESP_ZB_AF_HA_PROFILE_ID
@@ -39,10 +40,10 @@ void relay_update(void)
 {
     if (relay_status) {
       ESP_LOGI(TAG, "ON");
-      neopixelWrite(RGB_BUILTIN,20,20,20);
+      rgbLedWrite(RGB_BUILTIN,20,20,20);
     } else {
       ESP_LOGI(TAG, "OFF");
-      neopixelWrite(RGB_BUILTIN,0,0,0);
+      rgbLedWrite(RGB_BUILTIN,0,0,0);
     }
 }
 
@@ -65,18 +66,13 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
         break;
  
     case ESP_ZB_BDB_SIGNAL_DEVICE_FIRST_START:
-    case ESP_ZB_BDB_SIGNAL_DEVICE_REBOOT
+    case ESP_ZB_BDB_SIGNAL_DEVICE_REBOOT:
         if (err_status == ESP_OK) {
-            ESP_LOGI(TAG, "Device started up in %s factory-reset mode", esp_zb_bdb_is_factory_new() ? "" : "non");
-            if (esp_zb_bdb_is_factory_new()) {
-                ESP_LOGI(TAG, "Start network steering");
-                esp_zb_bdb_start_top_level_commissioning(ESP_ZB_BDB_MODE_NETWORK_STEERING);
-            } else {
-                ESP_LOGI(TAG, "Device rebooted");
-            }
+            ESP_LOGI(TAG, "Start network steering");
+            esp_zb_bdb_start_top_level_commissioning(ESP_ZB_BDB_MODE_NETWORK_STEERING);
         } else {
-            /* commissioning failed */
-            ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s)", esp_err_to_name(err_status));
+            // commissioning failed
+            log_w("Failed to initialize Zigbee stack (status: %s)", esp_err_to_name(err_status));
         }
         break;
 
@@ -182,7 +178,7 @@ static void reportAttribute(uint8_t endpoint, uint16_t clusterID, uint16_t attri
     cmd.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
     cmd.clusterID = clusterID;
     cmd.attributeID = attributeID;
-    cmd.cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE;
+    //cmd.cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE;
     esp_zb_zcl_attr_t *value_r = esp_zb_zcl_get_attribute(endpoint, clusterID, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, attributeID);
     memcpy(value_r->data_p, value, value_length);
     esp_zb_zcl_report_attr_cmd_req(&cmd);
@@ -193,7 +189,9 @@ static void update_relay(void *pvParameters)
   while(1) {
     if (connected) {
       temperature = temperature + (esp_random() % 200 - 100);
+      esp_zb_lock_acquire(portMAX_DELAY);
       esp_zb_zcl_status_t state_tmp = esp_zb_zcl_set_attribute_val(DEVICE_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_TEMP_MEASUREMENT_VALUE_ID, &temperature, false);
+      esp_zb_lock_release();
       if(state_tmp != ESP_ZB_ZCL_STATUS_SUCCESS) {
         ESP_LOGE(TAG, "Setting temperature attribute failed!");
       }
@@ -207,6 +205,17 @@ static void set_zcl_string(char *buffer, char *value)
 {
     buffer[0] = (char) strlen(value);
     memcpy(buffer + 1, value, buffer[0]);
+}
+
+esp_err_t esp_zb_ep_list_add_ep_(esp_zb_ep_list_t *ep_list, esp_zb_cluster_list_t *cluster_list, uint8_t endpoint, uint16_t app_profile_id, uint16_t app_device_id)
+{
+    esp_zb_endpoint_config_t endpoint_config;
+
+    endpoint_config.endpoint = endpoint;
+    endpoint_config.app_profile_id = app_profile_id;
+    endpoint_config.app_device_id = app_device_id;
+    endpoint_config.app_device_version = 1;
+    return esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config);
 }
 
 static void esp_zb_task(void *pvParameters)
@@ -234,7 +243,7 @@ static void esp_zb_task(void *pvParameters)
     uint8_t identyfi_id;
     identyfi_id = 0;
     esp_zb_attribute_list_t *attr_list_identify = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY);
-    esp_zb_identify_cluster_add_attr(attr_list_identify, ESP_ZB_ZCL_CMD_IDENTIFY_IDENTIFY_ID, &identyfi_id);
+    esp_zb_identify_cluster_add_attr(attr_list_identify, ESP_ZB_ZCL_ATTR_IDENTIFY_IDENTIFY_TIME_ID, &identyfi_id);
 
     // OnOff cluster
     esp_zb_attribute_list_t *attr_list_on_off = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_ON_OFF);
@@ -253,24 +262,27 @@ static void esp_zb_task(void *pvParameters)
     esp_zb_cluster_list_add_identify_cluster(cluster_list, attr_list_identify, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
     esp_zb_cluster_list_add_on_off_cluster(cluster_list, attr_list_on_off, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
     esp_zb_cluster_list_add_temperature_meas_cluster(cluster_list, attr_list_temperature_meas, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
-    esp_zb_ep_list_add_ep(ep_list, cluster_list, DEVICE_ENDPOINT, DEVICE_PROFILE_ID, DEVICE_ID);
+    esp_zb_ep_list_add_ep_(ep_list, cluster_list, DEVICE_ENDPOINT, DEVICE_PROFILE_ID, DEVICE_ID);
 
     esp_zb_init(&zigbee_config);
     esp_zb_device_register(ep_list);
     esp_zb_core_action_handler_register(zb_action_handler);
     esp_zb_set_primary_network_channel_set(ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK);
 
-    //esp_zb_nvram_erase_at_start(true); // Comment out this line to erase NVRAM data if you are connecting to new Coordinator
+  //  esp_zb_nvram_erase_at_start(true); // Comment out this line to erase NVRAM data if you are connecting to new Coordinator
     
     ESP_ERROR_CHECK(esp_zb_start(false));
     esp_zb_main_loop_iteration();
 }
 
 void setup() {
+    Serial.begin(115200);
+    Serial.println("-------------------------------------------------------------------------");
+
     esp_zb_platform_config_t platform_config;
     memset(&platform_config, 0, sizeof(platform_config));
-    platform_config.radio_config.radio_mode = RADIO_MODE_NATIVE;
-    platform_config.host_config.host_connection_mode = HOST_CONNECTION_MODE_NONE;
+    platform_config.radio_config.radio_mode = ZB_RADIO_MODE_NATIVE;
+    platform_config.host_config.host_connection_mode = ZB_HOST_CONNECTION_MODE_NONE;
   
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_zb_platform_config(&platform_config));
