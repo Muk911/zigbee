@@ -1,3 +1,6 @@
-https://electropeak.com/learn/interfacing-dy-sv17f-audio-mp3-player-module-with-arduino/
+# Устройство для звукового сигнализирования
 
-https://github.com/SnijderC/dyplayer
+Используется модуль ESP32-C6/H2 для воспроизведения мелодии модулем DY-SV17F.
+
+- https://electropeak.com/learn/interfacing-dy-sv17f-audio-mp3-player-module-with-arduino/
+- https://github.com/SnijderC/dyplayer
