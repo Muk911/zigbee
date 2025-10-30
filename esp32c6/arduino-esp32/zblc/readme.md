@@ -14,3 +14,11 @@
 
 ## Зависимости ##
 Zigbee Low Code использует библиотеку OneButton для реализации сервисной кнопки (см. файлы zb_button.*).
+
+## Компиляция ##
+Если при компиляции возникает ошибка 
+
+\esp32c6/include/espressif__esp-zigbee-lib/include/zcl/esp_zigbee_zcl_core.h:259:54:
+error: 'esp_zb_zcl_command_send_status_callback_t' was not declared in this scope
+
+закомментируйте указанную в ошибке строку файла esp_zigbee_zcl_core.h
