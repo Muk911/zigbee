@@ -33,8 +33,10 @@
   
 ### Примеры кода ###
 - https://github.com/acha666/esp32-h2-air-sensor
+- https://github.com/alex-omk/zb_airWick
 - https://github.com/allexoK/Esp32-C6-Bug-Arduino-Examples
 - https://github.com/andryblack/esp-coordinator
+- https://github.com/AndunHH/Dew-Point-Ventilation-Zigbee
 - https://github.com/ArtemProc/ESP32-c6-zb-esp-idf
 - https://github.com/barsik21/esp32h2-thermo
 - https://github.com/BegoonLab/xiao-esp32c6-wifi-sensor
@@ -52,6 +54,7 @@
 - https://github.com/GavriKos/ZigBee-irrigation-automation
 - https://github.com/ginkage/CeilingCW-C6
 - https://github.com/greatcattw/ESP32_C6_matter_example_bin_C3_c2
+- https://github.com/IgnacioHR/ZigbeeGasMeter
 - https://github.com/jorritohm/ESP32-C6_ZigBee_Sensor-and-Display
 - https://github.com/ksushaizplusha/esp_vindkring
 - https://github.com/kylemwagner83/esp32c6-bme280-zigbee
@@ -71,6 +74,7 @@
 - https://github.com/RJSDevel/HA_switch_2_gang_wt0132c6-s5
 - https://github.com/RJSDevel/IKEA_VINDRIKTNING_ESP32_ZIGBEE
 - https://github.com/rpavlyuk/ESPPressureSensor
+- https://github.com/sander102907/ZbShade
 - https://github.com/scipioni/beesensor
 - https://github.com/sigmdel/xiao_esp32c6_sketches
 - https://github.com/sl45sms/esp32c6-Keyword-Spotting
