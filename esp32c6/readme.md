@@ -1,21 +1,22 @@
-## Устройства на базе ESP32-C6/H2 ##
-Модули ESP32-C6 и ESP32-H2 от китайской компании Expressif унаследовали все прелести традиционных ESP32-WROOM, но дополнительно снабжены Zigbee, что делает их удобной базой для реализации единичных Zigbee-устройств.
+## Устройства на базе ESP32-C6/C5/H2 ##
+Модули ESP32-C6, ESP32-C5 и ESP32-H2 от китайской компании Expressif унаследовали все прелести традиционных ESP32-WROOM, но дополнительно снабжены Zigbee, что делает их удобной базой для реализации единичных Zigbee-устройств.
 Но есть и некоторые минусы:
-- Сырое ПО. В настоящее время компания Expressif продолжает дорабатывать библиотеки и IDE для ESP32-C6/H2, соответственно часть стандарта Zigbee Cluster Library может оказаться нереализованной.
+- Сырое ПО. В настоящее время компания Expressif продолжает дорабатывать библиотеки и IDE для ESP32-C6/C5/H2, соответственно часть стандарта Zigbee Cluster Library может оказаться нереализованной.
 - Высокое энергопотребление модулей и недоработанные режимы сна. Реализация устройств с батарейным питанием может оказаться вызовом для разработчика.
 ### ПО для программирования ###
-Для разработки прошивок под модули ESP32-C6/H2 компания Expressif предоставляет open-source продукт [Expressif IoT Development Framework (IDF)](https://github.com/espressif/esp-idf).
+Для разработки прошивок под модули ESP32-C6/C5/H2 компания Expressif предоставляет open-source продукт [Expressif IoT Development Framework (IDF)](https://github.com/espressif/esp-idf).
 Входящий в него Expressif IDE представляет собой надстройку над Eclipse. Доступно также расширение Expressif IDF для VS Code+PlatformIO.
 
 Шаги по установке и настройке Expressif IDF описаны в статьях:
 - https://www.waveshare.com/wiki/ESP32-C6-DEV-KIT-N8
+- https://www.waveshare.com/wiki/ESP32-C5-WIFI6-KIT-NXRX
 - https://www.waveshare.com/wiki/ESP32-H2-DEV-KIT-N4
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee/
 - https://wiki.seeedstudio.com/xiao_esp32c6_zigbee_arduino/
 - https://community.home-assistant.io/t/help-with-esp32-h2-zigbee/766216/9
 
-Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. В статье описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/H2:
-- [Разработка Zigbee устройств на ESP32-C6/H2 в среде Arduino IDE](arduino-esp32/)
+Для начального старта можно использовать также известный Arduino IDE и библиотеку Arduino-ESP32. В статье описаны шаги по настройке Arduino IDE для разработки под ESP32-C6/C5/H2:
+- [Разработка Zigbee устройств на ESP32-C6/C5/H2 в среде Arduino IDE](arduino-esp32/)
 
 Еще одной альтернативой является использование Expressif IDF и подключение библиотек Arduino как компонентов IDF.
 
