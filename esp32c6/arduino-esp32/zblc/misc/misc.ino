@@ -1,19 +1,3 @@
-/* ToDo:
-  - автоматическое добавление обязательных атрибутов
-  - добавить поддержку команд, например Toggle для OnOff
-  - сделать собственный файл определения ИД кластеров, их атрибутов, типов данных, ролей кластеров и т.п.
-  * сделать автоопределение типа данных для стандартных атрибутов
-
-  https://github.com/P-R-O-C-H-Y/arduino-esp32/blob/Zigbee-examples/libraries/ESP32/examples/Zigbee/Zigbee_Light_Switch/Zigbee_Light_Switch.ino
-  https://github.com/u236/esp32c6-light-example/blob/main/main/main.c
-  https://github.com/lmahmutov/esp32_c6_co2_sensor/blob/main/main/esp_zigbee_co2.c
-
-  https://docs.espressif.com/projects/esp-zigbee-sdk/en/latest/esp32/api-reference/esp_zigbee_core.html
-
-  https://github.com/espressif/esp-zigbee-sdk/issues/76
-
-*/
-
 #ifndef ZIGBEE_MODE_ED
 #error "Zigbee end device mode is not selected in Tools->Zigbee mode"
 #endif
@@ -512,4 +496,5 @@ void setup() {
 void loop() {
 }
 */
+
 
